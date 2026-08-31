@@ -1,0 +1,82 @@
+# IDE and Editor files
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+nbproject/
+.project
+.classpath
+.settings/
+build/
+.DS_Store
+Thumbs.db
+
+# Java/Maven
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
+
+# Log files
+*.log
+logs/
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+
+# Node.js/Frontend
+node_modules/
+dist/
+dist-ssr/
+.output
+coverage/
+# pnpm 本地依赖仓库（install 时按需在项目内生成）
+.pnpm-store/
+
+# 环境变量（.env.example 保留跟踪，本地私有配置不提交）
+*.local
+.env
+.env.*
+!.env.example
+
+# Expo / React Native
+.expo/
+web-build/
+expo-env.d.ts
+# EAS 项目标识本地配置（个人 projectId/owner，不入库）
+.local.eas.json
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.tsbuildinfo
+
+# Package manager files
+pnpm-lock.yaml
+yarn.lock
+package-lock.json
+
+# Configuration files with sensitive data
+**/application.yml
+**/application-*.yml
+!**/application.yml.template
+!**/application-*.yml.template
+# Docker configurations (non-sensitive, for deployment)
+!Backend/FeiTwnd-server/src/main/resources/application-docker.yml
+!/docker-compose.yml
+!/Dockerfile
+
+# Tooling local state
+.claude/
+
+CLAUDE.md
+AGENTS.md

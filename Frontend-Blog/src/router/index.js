@@ -1,0 +1,118 @@
+import { createRouter, createWebHistory } from 'vue-router'
+
+let footprintEnabled = null
+
+const router = createRouter({
+  history: createWebHistory(import.meta.env.BASE_URL),
+  scrollBehavior: () => ({ top: 0 }),
+  routes: [
+    {
+      path: '/',
+      component: () => import('@/view/Layout/index.vue'),
+      children: [
+        {
+          path: '',
+          name: 'home',
+          component: () => import('@/view/Home/index.vue'),
+          meta: { title: '首页' }
+        },
+        {
+          path: 'article/:slug',
+          name: 'article',
+          component: () => import('@/view/Article/index.vue'),
+          meta: { title: '文章' }
+        },
+        {
+          path: 'category/:slug',
+          name: 'category',
+          component: () => import('@/view/Category/index.vue'),
+          meta: { title: '分类' }
+        },
+        {
+          path: 'tag/:slug',
+          name: 'tag',
+          component: () => import('@/view/Tag/index.vue'),
+          meta: { title: '标签' }
+        },
+        {
+          path: 'archive',
+          name: 'archive',
+          component: () => import('@/view/Archive/index.vue'),
+          meta: { title: '归档' }
+        },
+        {
+          path: 'music',
+          name: 'music',
+          component: () => import('@/view/Music/index.vue'),
+          meta: { title: '音乐' }
+        },
+        {
+          path: 'links',
+          name: 'links',
+          component: () => import('@/view/Links/index.vue'),
+          meta: { title: '友链' }
+        },
+        {
+          path: 'message',
+          name: 'message',
+          component: () => import('@/view/Message/index.vue'),
+          meta: { title: '留言板' }
+        },
+        {
+          path: 'about',
+          name: 'about',
+          component: () => import('@/view/About/index.vue'),
+          meta: { title: '关于' }
+        }
+      ]
+    },
+    {
+      path: '/403',
+      name: 'forbidden',
+      component: () => import('@/view/Forbidden/index.vue'),
+      meta: { title: '访问受限' }
+    },
+    {
+      path: '/footprint',
+      component: () => import('@/view/Footprint/index.vue'),
+      children: [
+        {
+          path: '',
+          name: 'footprint',
+          meta: { title: '足迹' }
+        },
+        {
+          path: 'city/:id',
+          name: 'cityGallery',
+          component: () => import('@/view/Footprint/CityGallery.vue'),
+          meta: { title: '城市图集' }
+        }
+      ]
+    },
+    {
+      path: '/:pathMatch(.*)*',
+      name: 'notFound',
+      component: () => import('@/view/NotFound/index.vue'),
+      meta: { title: '页面不存在' }
+    }
+  ]
+})
+
+router.beforeEach(async (to) => {
+  document.title = to.meta.title ? `${to.meta.title} - wutao` : 'wutao'
+
+  if (to.path.startsWith('/footprint')) {
+    if (footprintEnabled === null) {
+      try {
+        const { getConfigByKey } = await import('@/api/systemConfig')
+        const res = await getConfigByKey('use-footprint')
+        footprintEnabled = res?.data?.data?.configValue === 'true'
+      } catch {
+        footprintEnabled = true
+      }
+    }
+    if (!footprintEnabled) return { name: 'home' }
+  }
+})
+
+export default router
