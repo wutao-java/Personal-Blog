@@ -2,40 +2,6 @@
 import { computed, nextTick, ref } from 'vue'
 import { useBlogStore } from '@/stores'
 import SidebarCard from '@/components/SidebarCard.vue'
-import demoCover from '@/assets/images/bgc.webp'
-
-const demoTracks = [
-  {
-    id: 'demo-1',
-    title: '晨间循环',
-    artist: 'SoundHelix 示例',
-    album: '清晨选集',
-    duration: 372,
-    coverImage: demoCover,
-    coverFilter: 'none',
-    musicUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3'
-  },
-  {
-    id: 'demo-2',
-    title: '城市夜行',
-    artist: 'SoundHelix 示例',
-    album: '午夜电台',
-    duration: 425,
-    coverImage: demoCover,
-    coverFilter: 'hue-rotate(70deg) saturate(1.1)',
-    musicUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3'
-  },
-  {
-    id: 'demo-3',
-    title: '窗边雨声',
-    artist: 'SoundHelix 示例',
-    album: '雨天手记',
-    duration: 315,
-    coverImage: demoCover,
-    coverFilter: 'hue-rotate(155deg) saturate(0.9)',
-    musicUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3'
-  }
-]
 
 const blogStore = useBlogStore()
 const audioRef = ref(null)
@@ -45,10 +11,7 @@ const currentTime = ref(0)
 const audioDuration = ref(0)
 const volume = ref(0.8)
 
-const usingDemoTracks = computed(() => blogStore.musics.length === 0)
-const tracks = computed(() =>
-  usingDemoTracks.value ? demoTracks : blogStore.musics
-)
+const tracks = computed(() => blogStore.musics)
 const currentTrack = computed(() => tracks.value[currentIndex.value] || null)
 const duration = computed(
   () => audioDuration.value || currentTrack.value?.duration || 0

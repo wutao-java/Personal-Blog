@@ -52,13 +52,13 @@ public interface MusicMapper {
      * @param id
      * @return
      */
-    @Select("select * from music where id = #{id}")
+    @Select("select id, title, artist, album, duration, cover_image, music_url, lyric_url, has_lyric, lyric_type, sort, is_visible, create_time, update_time from music where id = #{id}")
     Music getById(Long id);
 
     /**
      * 获取所有可见的音乐
      * @return
      */
-    @Select("select * from music where is_visible = 1 order by sort asc, id desc")
+    @Select("select id, title, artist, album, duration, cover_image, music_url, lyric_url, has_lyric, lyric_type, sort, is_visible, create_time, update_time from music where is_visible = 1 order by sort asc, id desc")
     List<Music> getAllVisibleMusic();
 }

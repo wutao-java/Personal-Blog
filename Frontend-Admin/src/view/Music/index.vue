@@ -56,13 +56,13 @@ const form = ref({
   id: null,
   title: '',
   artist: '',
+  album: '',
   duration: null,
   coverImage: '',
   musicUrl: '',
   lyricUrl: '',
-  hasLyric: 0,
   lyricType: '',
-  sort: null,
+  sort: 0,
   isVisible: 1
 })
 const saving = ref(false)
@@ -74,13 +74,13 @@ const openDialog = (row = null) => {
       id: row.id,
       title: row.title,
       artist: row.artist ?? '',
+      album: row.album ?? '',
       duration: row.duration ?? null,
       coverImage: row.coverImage ?? '',
       musicUrl: row.musicUrl ?? '',
       lyricUrl: row.lyricUrl ?? '',
-      hasLyric: row.hasLyric ?? 0,
       lyricType: row.lyricType ?? '',
-      sort: row.sort ?? null,
+      sort: row.sort ?? 0,
       isVisible: row.isVisible ?? 1
     }
   } else {
@@ -88,13 +88,13 @@ const openDialog = (row = null) => {
       id: null,
       title: '',
       artist: '',
+      album: '',
       duration: null,
       coverImage: '',
       musicUrl: '',
       lyricUrl: '',
-      hasLyric: 0,
       lyricType: '',
-      sort: null,
+      sort: 0,
       isVisible: 1
     }
   }
@@ -123,7 +123,6 @@ const handleAudioUpload = async (options) => {
     fd.append('file', options.file)
     const res = await uploadFile(fd)
     form.value.musicUrl = res.data
-    form.value.hasLyric = form.value.musicUrl ? form.value.hasLyric : 0
     ElMessage.success('音频上传成功')
   } finally {
     uploadingAudio.value = false
@@ -138,7 +137,6 @@ const handleLyricUpload = async (options) => {
     fd.append('file', options.file)
     const res = await uploadFile(fd)
     form.value.lyricUrl = res.data
-    form.value.hasLyric = 1
     ElMessage.success('歌词上传成功')
   } finally {
     uploadingLyric.value = false
@@ -284,6 +282,12 @@ onMounted(() => {
           width="160"
           show-overflow-tooltip
         />
+        <el-table-column
+          prop="album"
+          label="专辑"
+          width="160"
+          show-overflow-tooltip
+        />
         <el-table-column label="时长" width="80" align="center">
           <template #default="{ row }">
             {{
@@ -355,6 +359,9 @@ onMounted(() => {
         </el-form-item>
         <el-form-item label="作者">
           <el-input v-model="form.artist" placeholder="作者" clearable />
+        </el-form-item>
+        <el-form-item label="专辑">
+          <el-input v-model="form.album" placeholder="专辑名称" clearable />
         </el-form-item>
         <el-form-item label="时长(秒)">
           <el-input-number

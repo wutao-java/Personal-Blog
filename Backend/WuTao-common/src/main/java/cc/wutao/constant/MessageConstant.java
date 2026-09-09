@@ -25,6 +25,8 @@ public class MessageConstant {
     public static final String EMAIL_OR_QQ_REQUIRED = "请输入邮箱或QQ号";
     public static final String ConfigKeyExists = "配置键已存在";
     public static final String ARTICLE_NOT_FOUND = "文章不存在";
+    public static final String MUSIC_NOT_FOUND = "音乐不存在";
+    public static final String MUSIC_ID_REQUIRED = "音乐ID不能为空";
     public static final String GUEST_READ_ONLY = "游客账号仅有查看权限，无法进行此操作";
     public static final String VISITOR_TOKEN_INVALID = "访客身份无效，请刷新页面后重试";
 }

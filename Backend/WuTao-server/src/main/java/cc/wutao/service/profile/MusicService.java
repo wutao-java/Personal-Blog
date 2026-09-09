@@ -3,9 +3,12 @@ package cc.wutao.service.profile;
 import cc.wutao.dto.MusicDTO;
 import cc.wutao.dto.MusicPageQueryDTO;
 import cc.wutao.entity.Music;
+import cc.wutao.exception.MusicException;
+import cc.wutao.exception.ValidationException;
 import cc.wutao.mapper.MusicMapper;
 import cc.wutao.result.PageResult;
 import cc.wutao.vo.MusicVO;
+import cc.wutao.constant.MessageConstant;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import lombok.RequiredArgsConstructor;
@@ -13,9 +16,11 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 
 @Service
 @RequiredArgsConstructor
@@ -29,9 +34,7 @@ public class MusicService {
      */
     @CacheEvict(value = "musicList", allEntries = true)
     public void addMusic(MusicDTO musicDTO) {
-        Music music = new Music();
-        BeanUtils.copyProperties(musicDTO, music);
-        musicMapper.insert(music);
+        musicMapper.insert(toMusic(musicDTO));
     }
 
     /**
@@ -53,9 +56,11 @@ public class MusicService {
      */
     @CacheEvict(value = "musicList", allEntries = true)
     public void updateMusic(MusicDTO musicDTO) {
-        Music music = new Music();
-        BeanUtils.copyProperties(musicDTO, music);
-        musicMapper.update(music);
+        if (musicDTO.getId() == null) {
+            throw new ValidationException(MessageConstant.MUSIC_ID_REQUIRED);
+        }
+        getById(musicDTO.getId());
+        musicMapper.update(toMusic(musicDTO));
     }
 
     /**
@@ -73,7 +78,11 @@ public class MusicService {
      * @return
      */
     public Music getById(Long id) {
-        return musicMapper.getById(id);
+        Music music = musicMapper.getById(id);
+        if (music == null) {
+            throw new MusicException(MessageConstant.MUSIC_NOT_FOUND);
+        }
+        return music;
     }
 
     /**
@@ -89,16 +98,48 @@ public class MusicService {
                     .id(music.getId())
                     .title(music.getTitle())
                     .artist(music.getArtist())
+                    .album(music.getAlbum())
                     .duration(music.getDuration())
                     .coverImage(music.getCoverImage())
                     .musicUrl(music.getMusicUrl())
                     .lyricUrl(music.getLyricUrl())
-                    .hasLyric(music.getHasLyric())
-                    .lyricType(music.getLyricType())
+                    .hasLyric(hasLyric(music.getLyricUrl()))
+                    .lyricType(resolveLyricType(music.getLyricUrl(), music.getLyricType()))
                     .build()
             ).toList();
             return musicVOList;
         }
         return Collections.emptyList();
+    }
+
+    private Music toMusic(MusicDTO musicDTO) {
+        Music music = new Music();
+        BeanUtils.copyProperties(musicDTO, music);
+        music.setArtist(StringUtils.hasText(musicDTO.getArtist()) ? musicDTO.getArtist().trim() : "");
+        music.setAlbum(StringUtils.hasText(musicDTO.getAlbum()) ? musicDTO.getAlbum().trim() : "");
+        String lyricUrl = StringUtils.hasText(musicDTO.getLyricUrl()) ? musicDTO.getLyricUrl().trim() : null;
+        music.setLyricUrl(lyricUrl);
+        music.setHasLyric(hasLyric(lyricUrl));
+        music.setLyricType(resolveLyricType(lyricUrl, musicDTO.getLyricType()));
+        music.setSort(musicDTO.getSort() == null ? 0 : musicDTO.getSort());
+        music.setIsVisible(musicDTO.getIsVisible() == null ? 1 : musicDTO.getIsVisible());
+        return music;
+    }
+
+    private int hasLyric(String lyricUrl) {
+        return StringUtils.hasText(lyricUrl) ? 1 : 0;
+    }
+
+    private String resolveLyricType(String lyricUrl, String lyricType) {
+        if (!StringUtils.hasText(lyricUrl)) {
+            return null;
+        }
+        if (StringUtils.hasText(lyricType)) {
+            return lyricType.trim().toLowerCase(Locale.ROOT);
+        }
+
+        String path = lyricUrl.split("\\?", 2)[0];
+        int extensionIndex = path.lastIndexOf('.');
+        return extensionIndex < 0 ? null : path.substring(extensionIndex + 1).toLowerCase(Locale.ROOT);
     }
 }

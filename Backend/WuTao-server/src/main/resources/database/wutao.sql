@@ -336,23 +336,24 @@ create table messages(
 -- 音乐表
 create table music(
     id int primary key auto_increment,
-    title varchar(50) not null comment '音乐标题',
-    artist varchar(50) comment '作者',
-    duration int comment '时长，单位：秒',
+    title varchar(100) not null comment '音乐标题',
+    artist varchar(100) not null default '' comment '作者',
+    album varchar(100) not null default '' comment '专辑名称',
+    duration int unsigned comment '时长，单位：秒',
     -- 文件信息url
-    cover_image varchar(255) comment '封面图片url',
-    music_url varchar(255) not null comment '音频文件url',
-    lyric_url varchar(255) comment '歌词文件url',
+    cover_image varchar(1024) comment '封面图片url',
+    music_url varchar(1024) not null comment '音频文件url',
+    lyric_url varchar(1024) comment '歌词文件url',
 
-    has_lyric tinyint default 0 comment '是否有歌词，0-否，1-是',
-    lyric_type varchar(10) comment '歌词类型,lrc,json,txt',
-    sort int comment '排序，越小越靠前',
-    is_visible tinyint default 1 comment '是否可见',
+    has_lyric tinyint not null default 0 comment '是否有歌词，0-否，1-是',
+    lyric_type varchar(16) comment '歌词类型,lrc,json,txt',
+    sort int not null default 0 comment '排序，越小越靠前',
+    is_visible tinyint not null default 1 comment '是否可见',
 
     create_time datetime comment '创建时间',
     update_time datetime comment '更新时间',
 
-    index idx_sort_visible (sort, is_visible,id desc)
+    index idx_visible_sort (is_visible, sort, id desc)
 ) comment '音乐表';
 
 -- 城市足迹表

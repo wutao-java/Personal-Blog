@@ -4,12 +4,13 @@
 <mapper namespace="cc.wutao.mapper.MusicMapper">
 
     <insert id="insert">
-        insert into music (title, artist, duration, cover_image, music_url, lyric_url, has_lyric, lyric_type, sort, is_visible, create_time, update_time)
-        values (#{title}, #{artist}, #{duration}, #{coverImage}, #{musicUrl}, #{lyricUrl}, #{hasLyric}, #{lyricType}, #{sort}, #{isVisible}, #{createTime}, #{updateTime})
+        insert into music (title, artist, album, duration, cover_image, music_url, lyric_url, has_lyric, lyric_type, sort, is_visible, create_time, update_time)
+        values (#{title}, #{artist}, #{album}, #{duration}, #{coverImage}, #{musicUrl}, #{lyricUrl}, #{hasLyric}, #{lyricType}, #{sort}, #{isVisible}, #{createTime}, #{updateTime})
     </insert>
 
     <select id="pageQuery" resultType="cc.wutao.entity.Music">
-        select * from music
+        select id, title, artist, album, duration, cover_image, music_url, lyric_url, has_lyric, lyric_type, sort, is_visible, create_time, update_time
+        from music
         <where>
             <if test="title != null and title != ''">
                 and title like concat('%', #{title}, '%')
@@ -27,17 +28,18 @@
     <update id="update">
         update music
         <set>
-            <if test="title != null">title = #{title},</if>
-            <if test="artist != null">artist = #{artist},</if>
-            <if test="duration != null">duration = #{duration},</if>
-            <if test="coverImage != null">cover_image = #{coverImage},</if>
-            <if test="musicUrl != null">music_url = #{musicUrl},</if>
-            <if test="lyricUrl != null">lyric_url = #{lyricUrl},</if>
-            <if test="hasLyric != null">has_lyric = #{hasLyric},</if>
-            <if test="lyricType != null">lyric_type = #{lyricType},</if>
-            <if test="sort != null">sort = #{sort},</if>
-            <if test="isVisible != null">is_visible = #{isVisible},</if>
-            <if test="updateTime != null">update_time = #{updateTime}</if>
+            title = #{title},
+            artist = #{artist},
+            album = #{album},
+            duration = #{duration},
+            cover_image = #{coverImage},
+            music_url = #{musicUrl},
+            lyric_url = #{lyricUrl},
+            has_lyric = #{hasLyric},
+            lyric_type = #{lyricType},
+            sort = #{sort},
+            is_visible = #{isVisible},
+            update_time = #{updateTime}
         </set>
         where id = #{id}
     </update>

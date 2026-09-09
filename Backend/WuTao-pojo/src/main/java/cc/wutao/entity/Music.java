@@ -28,6 +28,9 @@ public class Music implements Serializable {
     // 作者
     private String artist;
 
+    // 专辑
+    private String album;
+
     // 时长，单位：秒
     private Integer duration;
 
