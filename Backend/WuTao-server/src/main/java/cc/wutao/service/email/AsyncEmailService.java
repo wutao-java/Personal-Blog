@@ -1,0 +1,41 @@
+package cc.wutao.service.email;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Service;
+
+/**
+ * 异步邮件服务实现（独立 Service 保证 @Async 代理生效）
+ */
+@Service
+@Slf4j
+@RequiredArgsConstructor
+public class AsyncEmailService {
+
+    private final EmailService emailService;
+
+    /**
+     * 异步发送评论/留言回复通知邮件
+     */
+    @Async("taskExecutor")
+    public void sendReplyNotificationAsync(String toEmail, String parentNickname, String parentContent,
+                                           String replyNickname, String replyContent, String type) {
+        try {
+            emailService.sendReplyNotification(toEmail, parentNickname, parentContent,
+                    replyNickname, replyContent, type);
+        } catch (Exception e) {
+            log.error("异步发送回复通知邮件失败: to={}, type={}, ex={}", toEmail, type, e.getMessage());
+        }
+    }
+
+    @Async("taskExecutor")
+    public void sendAdminContentNotificationAsync(String type, String nickname, String content, String articleTitle) {
+        try {
+            emailService.sendAdminContentNotification(type, nickname, content, articleTitle);
+        } catch (Exception e) {
+            log.error("异步发送站长内容通知邮件失败: type={}, ex={}", type, e.getMessage());
+        }
+    }
+
+}

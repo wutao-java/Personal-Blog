@@ -1,14 +1,14 @@
 {
   "expo": {
-    "name": "FeiTwnd-App",
-    "slug": "FeiTwnd-App",
+    "name": "WuTao-App",
+    "slug": "WuTao-App",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "feitwndapp",
+    "scheme": "wutaoapp",
     "userInterfaceStyle": "automatic",
     "android": {
-      "package": "cc.feitwnd.app",
+      "package": "cc.wutao.app",
       "backgroundColor": "#f5f7fa",
       "predictiveBackGestureEnabled": false
     },

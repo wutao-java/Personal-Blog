@@ -108,7 +108,7 @@ export default function LoginScreen() {
           >
             <View style={styles.brandArea}>
               <ThemedText type="title" style={styles.brand}>
-                FeiTwnd
+                WuTao
               </ThemedText>
               <ThemedText type="smallBold" themeColor="textSecondary">
                 个人博客管理后台

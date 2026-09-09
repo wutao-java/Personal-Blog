@@ -1,4 +1,4 @@
-# FeiTwnd Docker 部署指南
+# WuTao Docker 部署指南
 
 > **重要提醒**: 文档中的域名 `example.com`、`admin.example.com` 等仅为示例，请根据实际情况替换为你自己的域名。
 
@@ -7,7 +7,7 @@
 ## 目录结构
 
 ```
-FeiTwnd/
+WuTao/
 ├── Dockerfile              # 后端应用镜像
 ├── docker-compose.yml     # 服务编排
 └── docker/
@@ -15,9 +15,9 @@ FeiTwnd/
     ├── nginx/
     │   ├── nginx.conf          # Nginx 主配置
     │   ├── conf.d/
-    │   │   └── feitwnd-backend.conf  # 后端代理配置
+    │   │   └── wutao-backend.conf  # 后端代理配置
     │   └── sites-enabled/
-    │       └── feitwnd.cc      # 前端站点配置（使用自己的域名时需重命名该文件并修改 server_name/root）
+    │       └── wutao.cc      # 前端站点配置（使用自己的域名时需重命名该文件并修改 server_name/root）
     ├── mysql/
     │   └── init/           # MySQL 初始化脚本
     └── html/               # 前端静态文件目录
@@ -85,9 +85,9 @@ WEBSITE_BLOG=https://blog.example.com
 
 ### 2. 初始化数据库
 
-**无需手动导入**：MySQL 容器首次启动时会自动执行 `docker/mysql/init/feitwnd.sql`（挂载到 `/docker-entrypoint-initdb.d`），自动创建 `FeiTwnd` 数据库、`feitwnd` 用户及全部数据表。
+**无需手动导入**：MySQL 容器首次启动时会自动执行 `docker/mysql/init/wutao.sql`（挂载到 `/docker-entrypoint-initdb.d`），自动创建 `WuTao` 数据库、`wutao` 用户及全部数据表。
 
-> 已包含：管理员账号、游客账号、系统配置等初始数据。初始 SQL 中管理员/游客账号为 `xxx` 占位符，**登录前需先修改数据库**：用户名改为你自己的，密码需用后端测试类 `FeiTwndBackendApplicationTests.testPassword` 生成加密值（SHA-256(password+salt)）后更新（详见根目录 README"快速开始"章节）。
+> 已包含：管理员账号、游客账号、系统配置等初始数据。初始 SQL 中管理员/游客账号为 `xxx` 占位符，**登录前需先修改数据库**：用户名改为你自己的，密码需用后端测试类 `WuTaoBackendApplicationTests.testPassword` 生成加密值（SHA-256(password+salt)）后更新（详见根目录 README"快速开始"章节）。
 
 ### 3. 放入前端静态文件
 
@@ -111,7 +111,7 @@ mkdir -p docker/html/admin.example.com/html
 cp -r ../Frontend-Admin/dist/* docker/html/admin.example.com/html/
 ```
 
-> 目录名中的域名（如 `blog.example.com`）必须与 `docker/nginx/sites-enabled/` 配置里的 `server_name` 和 `root` 保持一致（默认配置为 `feitwnd.cc` 系列域名，使用自己的域名时请统一修改）。
+> 目录名中的域名（如 `blog.example.com`）必须与 `docker/nginx/sites-enabled/` 配置里的 `server_name` 和 `root` 保持一致（默认配置为 `wutao.cc` 系列域名，使用自己的域名时请统一修改）。
 
 ### 4. 构建并启动服务
 
@@ -151,7 +151,7 @@ docker compose up -d --build backend
 
 ```bash
 # 进入 Nginx 容器
-docker exec -it feitwnd-nginx sh
+docker exec -it wutao-nginx sh
 
 # 安装 Certbot
 apk add certbot python3
@@ -193,7 +193,7 @@ server {
 | 变量名 | 必填 | 说明 | 默认值 |
 |--------|------|------|--------|
 | `MYSQL_ROOT_PASSWORD` | 是 | MySQL root 密码 | - |
-| `MYSQL_PASSWORD` | 是 | MySQL feitwnd 用户密码 | - |
+| `MYSQL_PASSWORD` | 是 | MySQL wutao 用户密码 | - |
 | `REDIS_PASSWORD` | 否 | Redis 密码（无需密码则留空） | - |
 | `JWT_SECRET_KEY` | 是 | JWT 签名密钥，建议至少32位随机字符串 | - |
 | `JWT_TTL` | 否 | JWT 过期时间(毫秒) | 86400000 (24小时) |
@@ -233,9 +233,9 @@ docker compose logs -f mysql       # MySQL 日志
 docker compose logs -f redis       # Redis 日志
 
 # 进入容器
-docker exec -it feitwnd-backend sh
-docker exec -it feitwnd-mysql mysql -uroot -p
-docker exec -it feitwnd-redis redis-cli
+docker exec -it wutao-backend sh
+docker exec -it wutao-mysql mysql -uroot -p
+docker exec -it wutao-redis redis-cli
 
 # 重新构建后端
 docker compose build backend
@@ -252,7 +252,7 @@ docker compose up -d backend
 
 ## 注意事项
 
-1. **数据库初始化**: MySQL 容器首次启动自动执行 `docker/mysql/init/feitwnd.sql`，无需手动导入；若需重置数据，删除 `mysql_data` 卷后重新启动
+1. **数据库初始化**: MySQL 容器首次启动自动执行 `docker/mysql/init/wutao.sql`，无需手动导入；若需重置数据，删除 `mysql_data` 卷后重新启动
 2. **敏感信息**: `.env` 文件包含敏感信息，请勿提交到版本控制（已加入 .gitignore）
 3. **内存配置**: Dockerfile 中 JVM 堆内存设置为 `-Xmx1024m -Xms256m`（4GB 内存机器同时运行 MySQL/Redis/Nginx），可根据服务器配置调整
 4. **安全建议**:
@@ -271,7 +271,7 @@ docker compose up -d backend
 docker compose logs backend
 
 # 检查数据库连接
-docker exec -it feitwnd-backend sh
+docker exec -it wutao-backend sh
 # 在容器内: telnet mysql 3306
 ```
 
@@ -282,7 +282,7 @@ docker exec -it feitwnd-backend sh
 docker compose ps
 
 # 检查 Nginx 配置
-docker exec feitwnd-nginx nginx -t
+docker exec wutao-nginx nginx -t
 ```
 
 ### 数据库连接问题

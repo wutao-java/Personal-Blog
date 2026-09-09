@@ -9,11 +9,11 @@
   <img src="https://img.shields.io/badge/license-MIT-blue?style=flat-square" alt="License">
 </p>
 
-# FeiTwnd — 个人全栈网站
+# WuTao — 个人全栈网站
 
 一套基于 **Spring Boot 3 + Vue 3 + Expo (React Native)** 的个人网站全栈解决方案，包含博客、后台管理、个人主页、在线简历四个 Web 子站点、一个移动端管理 App，以及一个统一后端服务。
 
-> 在线演示：[blog.feitwnd.cc](https://blog.feitwnd.cc) · [feitwnd.cc](https://feitwnd.cc) · [cv.feitwnd.cc](https://cv.feitwnd.cc)
+> 在线演示：[blog.wutao.cc](https://blog.wutao.cc) · [wutao.cc](https://wutao.cc) · [cv.wutao.cc](https://cv.wutao.cc)
 
 ---
 
@@ -143,19 +143,19 @@
 ## 项目结构
 
 ```
-FeiTwnd/
+WuTao/
 ├── Backend/                    # Spring Boot 后端
-│   ├── FeiTwnd-common/         # 公共模块（工具类、常量、异常）
-│   ├── FeiTwnd-pojo/           # 实体/DTO/VO
-│   ├── FeiTwnd-extension-api/  # 扩展模块契约层（可插拔模块与主程序间的接口）
-│   ├── FeiTwnd-ai/             # AI 摘要模块（可选，-Pwith-ai 构建时打包）
-│   └── FeiTwnd-server/         # 主服务（Controller、Service、Mapper）
+│   ├── WuTao-common/         # 公共模块（工具类、常量、异常）
+│   ├── WuTao-pojo/           # 实体/DTO/VO
+│   ├── WuTao-extension-api/  # 扩展模块契约层（可插拔模块与主程序间的接口）
+│   ├── WuTao-ai/             # AI 摘要模块（可选，-Pwith-ai 构建时打包）
+│   └── WuTao-server/         # 主服务（Controller、Service、Mapper）
 │       └── src/main/resources/
 │           ├── application.yml.template      # 配置模板
 │           ├── application-dev.yml.template   # 开发环境模板
 │           ├── application-prod.yml.template  # 生产环境模板
 │           ├── application-docker.yml         # Docker 环境配置
-│           ├── database/feitwnd.sql           # 数据库建表脚本
+│           ├── database/wutao.sql           # 数据库建表脚本
 │           └── mapper/                        # MyBatis XML
 ├── Frontend-Blog/              # 博客前端
 ├── Frontend-Admin/             # 管理后台前端
@@ -182,22 +182,22 @@ FeiTwnd/
 ### 1. 克隆项目
 
 ```bash
-git clone https://github.com/FeiTwnd/FeiTwnd-Website.git
-cd FeiTwnd
+git clone https://github.com/WuTao/WuTao-Website.git
+cd WuTao
 ```
 
 ### 2. 初始化数据库
 
 ```bash
 # 创建数据库并导入建表脚本
-mysql -u root -p -e "CREATE DATABASE FeiTwnd DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
-mysql -u root -p FeiTwnd < Backend/FeiTwnd-server/src/main/resources/database/feitwnd.sql
+mysql -u root -p -e "CREATE DATABASE WuTao DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+mysql -u root -p WuTao < Backend/WuTao-server/src/main/resources/database/wutao.sql
 ```
 
 ### 3. 配置后端
 
 ```bash
-cd Backend/FeiTwnd-server/src/main/resources
+cd Backend/WuTao-server/src/main/resources
 
 # 从模板复制配置文件
 cp application.yml.template application.yml
@@ -219,18 +219,18 @@ cp application-dev.yml.template application-dev.yml
 |---|---|---|
 | `spring.datasource.password` | application.yml | MySQL 密码 |
 | `spring.redis.password` | application.yml | Redis 密码（无密码则留空） |
-| `feitwnd.jwt.secret-key` | application.yml | JWT 签名密钥（随机字符串即可） |
-| `feitwnd.alioss.*` | application.yml | 阿里云 OSS 配置 |
+| `wutao.jwt.secret-key` | application.yml | JWT 签名密钥（随机字符串即可） |
+| `wutao.alioss.*` | application.yml | 阿里云 OSS 配置 |
 | `spring.mail.username` | application.yml | QQ 邮箱地址 |
 | `spring.mail.password` | application.yml | QQ 邮箱授权码 |
-| `feitwnd.email.personal` | application.yml | 发件人昵称 |
-| `feitwnd.email.from` | application.yml | 发件人邮箱 |
-| `feitwnd.email.admin-notify-to` | application.yml | 接收新评论和留言通知的站长邮箱 |
-| `feitwnd.visitor.verify-code` | application.yml | 访客验证码 |
-| `feitwnd.website.*` | application.yml | 网站标题和 4 个子站地址 |
-| `feitwnd.jwt.ttl` | application-dev.yml | JWT 过期时间（毫秒） |
-| `feitwnd.datasource.*` | application-dev.yml | 数据库连接信息 |
-| `feitwnd.redis.*` | application-dev.yml | Redis 连接信息 |
+| `wutao.email.personal` | application.yml | 发件人昵称 |
+| `wutao.email.from` | application.yml | 发件人邮箱 |
+| `wutao.email.admin-notify-to` | application.yml | 接收新评论和留言通知的站长邮箱 |
+| `wutao.visitor.verify-code` | application.yml | 访客验证码 |
+| `wutao.website.*` | application.yml | 网站标题和 4 个子站地址 |
+| `wutao.jwt.ttl` | application-dev.yml | JWT 过期时间（毫秒） |
+| `wutao.datasource.*` | application-dev.yml | 数据库连接信息 |
+| `wutao.redis.*` | application-dev.yml | Redis 连接信息 |
 
 </details>
 
@@ -239,7 +239,7 @@ cp application-dev.yml.template application-dev.yml
 ```bash
 cd Backend
 mvn clean package -DskipTests
-java -jar FeiTwnd-server/target/FeiTwnd-server-1.0-SNAPSHOT.jar --spring.profiles.active=dev
+java -jar WuTao-server/target/WuTao-server-1.0-SNAPSHOT.jar --spring.profiles.active=dev
 ```
 
 ### 5. 启动前端（开发模式）
@@ -302,10 +302,10 @@ npx eas-cli build -p android --profile preview
 ```bash
 cd Backend
 mvn clean package -DskipTests
-# 产出：FeiTwnd-server/target/FeiTwnd-server-1.0-SNAPSHOT.jar
+# 产出：WuTao-server/target/WuTao-server-1.0-SNAPSHOT.jar
 
 # 使用生产环境配置启动
-java -jar FeiTwnd-server-1.0-SNAPSHOT.jar --spring.profiles.active=prod
+java -jar WuTao-server-1.0-SNAPSHOT.jar --spring.profiles.active=prod
 ```
 
 ### AI 摘要模块（可选扩展）
@@ -319,14 +319,14 @@ cd Backend
 mvn clean package -DskipTests -Pwith-ai
 ```
 
-> 重要：**打包是否包含 AI 模块由构建期的 Maven profile（`with-ai`）决定，与配置文件里的 `feitwnd.ai.enabled` 无关**——`enabled` 只控制运行时是否启用，改它不会改变 jar 体积。
+> 重要：**打包是否包含 AI 模块由构建期的 Maven profile（`with-ai`）决定，与配置文件里的 `wutao.ai.enabled` 无关**——`enabled` 只控制运行时是否启用，改它不会改变 jar 体积。
 >
 > **使用 IDEA 打包**：打开右侧 Maven 面板，在 "Profiles" 分组里勾选 `with-ai`（等价于命令行 `-Pwith-ai`），点击刷新（Reload All Maven Projects）后重新打包即可；不勾选则产出不含 AI 的 jar。命令行与 IDEA 两种方式效果一致，二选一。
 
 启用后需在配置文件（或环境变量）中填写模型参数，支持任意 OpenAI 兼容协议的服务（DeepSeek / 通义 / 智谱 / Kimi / OpenRouter / Ollama 等），切换模型厂商只需改配置：
 
 ```yaml
-feitwnd:
+wutao:
   ai:
     enabled: true                          # 是否启用 AI 摘要生成
     base-url: https://api.deepseek.com/v1  # 模型接口地址（OpenAI 兼容协议）
@@ -336,7 +336,7 @@ feitwnd:
     timeout-seconds: 60                    # 请求超时（秒）
 ```
 
-> 各 AI 功能（摘要、后续的错别字修正等）的提示词存放在 ai 模块内部 `prompt` 包下的独立常量类（如 `FeiTwnd-ai/.../ai/prompt/ArticleSummaryPrompt.java`，一个功能一个常量类），不在 yml 中配置，新增功能时在模块内扩展即可。
+> 各 AI 功能（摘要、后续的错别字修正等）的提示词存放在 ai 模块内部 `prompt` 包下的独立常量类（如 `WuTao-ai/.../ai/prompt/ArticleSummaryPrompt.java`，一个功能一个常量类），不在 yml 中配置，新增功能时在模块内扩展即可。
 
 使用说明：
 - 管理端编辑页在"摘要"输入框下方出现"AI 生成摘要"开关；后端未打包该模块或未启用时，开关自动隐藏；

@@ -71,7 +71,7 @@ package-lock.json
 !**/application.yml.template
 !**/application-*.yml.template
 # Docker configurations (non-sensitive, for deployment)
-!Backend/FeiTwnd-server/src/main/resources/application-docker.yml
+!Backend/WuTao-server/src/main/resources/application-docker.yml
 !/docker-compose.yml
 !/Dockerfile
 

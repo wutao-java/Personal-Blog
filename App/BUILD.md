@@ -1,4 +1,4 @@
-# FeiTwnd-App 打包说明（Android APK · EAS Build）
+# WuTao-App 打包说明（Android APK · EAS Build）
 
 Expo（React Native）编写的移动端管理后台，与 `Frontend-Admin` 共用后端接口。
 打 APK 走 **EAS 云端构建**，本机不需要安装 Android Studio / SDK / JDK。

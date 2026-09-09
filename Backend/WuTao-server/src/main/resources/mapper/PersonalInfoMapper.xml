@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cc.wutao.mapper.PersonalInfoMapper">
+    <insert id="save">
+        insert into personal_info
+            (id, nickname, tag, description, avatar, website, email, github, location, create_time, update_time)
+        values
+            (#{id}, #{nickname}, #{tag}, #{description}, #{avatar}, #{website}, #{email}, #{github}, #{location}, #{createTime}, #{updateTime})
+        on duplicate key update
+            nickname = values(nickname),
+            tag = values(tag),
+            description = values(description),
+            avatar = values(avatar),
+            website = values(website),
+            email = values(email),
+            github = values(github),
+            location = values(location),
+            update_time = values(update_time)
+    </insert>
+</mapper>

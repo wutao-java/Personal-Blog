@@ -4,12 +4,12 @@ services:
   # MySQL数据库
   mysql:
     image: mysql:8.0
-    container_name: feitwnd-mysql
+    container_name: wutao-mysql
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-your_root_password}
-      MYSQL_DATABASE: FeiTwnd
-      MYSQL_USER: feitwnd
+      MYSQL_DATABASE: WuTao
+      MYSQL_USER: wutao
       MYSQL_PASSWORD: ${MYSQL_PASSWORD:-your_password}
       TZ: Asia/Shanghai
     volumes:
@@ -18,7 +18,7 @@ services:
     ports:
       - "3306:3306"
     networks:
-      - feitwnd-network
+      - wutao-network
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       interval: 10s
@@ -32,12 +32,12 @@ services:
   # Redis缓存
   redis:
     image: redis:7-alpine
-    container_name: feitwnd-redis
+    container_name: wutao-redis
     restart: always
     ports:
       - "6379:6379"
     networks:
-      - feitwnd-network
+      - wutao-network
     volumes:
       - redis_data:/data
     command: redis-server --appendonly yes
@@ -55,7 +55,7 @@ services:
       args:
         # 是否构建AI摘要模块（true 时镜像包含 langchain4j 与 AI 模块，包体增大；默认关闭）
         AI_ENABLED: ${AI_ENABLED:-false}
-    container_name: feitwnd-backend
+    container_name: wutao-backend
     restart: always
     environment:
       SPRING_PROFILES_ACTIVE: docker
@@ -63,8 +63,8 @@ services:
       # 数据库配置
       MYSQL_HOST: mysql
       MYSQL_PORT: 3306
-      MYSQL_DATABASE: FeiTwnd
-      MYSQL_USER: feitwnd
+      MYSQL_DATABASE: WuTao
+      MYSQL_USER: wutao
       MYSQL_PASSWORD: ${MYSQL_PASSWORD:-your_password}
       # Redis配置
       REDIS_HOST: redis
@@ -102,7 +102,7 @@ services:
     ports:
       - "5922:5922"
     networks:
-      - feitwnd-network
+      - wutao-network
     depends_on:
       mysql:
         condition: service_healthy
@@ -114,13 +114,13 @@ services:
   # Nginx反向代理
   nginx:
     image: nginx:alpine
-    container_name: feitwnd-nginx
+    container_name: wutao-nginx
     restart: always
     ports:
       - "80:80"
       - "443:443"
     networks:
-      - feitwnd-network
+      - wutao-network
     volumes:
       - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./docker/nginx/conf.d:/etc/nginx/conf.d:ro
@@ -141,5 +141,5 @@ volumes:
   nginx_logs:
 
 networks:
-  feitwnd-network:
+  wutao-network:
     driver: bridge

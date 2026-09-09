@@ -9,11 +9,11 @@ ARG AI_ENABLED=false
 # 复制全部模块的pom文件并提前下载依赖（go-offline 需解析完整 reactor，子模块 pom 缺一不可；
 # AI_ENABLED=true 时同时预下载 langchain4j 依赖，加快后续构建）
 COPY Backend/pom.xml .
-COPY Backend/FeiTwnd-common/pom.xml FeiTwnd-common/pom.xml
-COPY Backend/FeiTwnd-pojo/pom.xml FeiTwnd-pojo/pom.xml
-COPY Backend/FeiTwnd-extension-api/pom.xml FeiTwnd-extension-api/pom.xml
-COPY Backend/FeiTwnd-server/pom.xml FeiTwnd-server/pom.xml
-COPY Backend/FeiTwnd-ai/pom.xml FeiTwnd-ai/pom.xml
+COPY Backend/WuTao-common/pom.xml WuTao-common/pom.xml
+COPY Backend/WuTao-pojo/pom.xml WuTao-pojo/pom.xml
+COPY Backend/WuTao-extension-api/pom.xml WuTao-extension-api/pom.xml
+COPY Backend/WuTao-server/pom.xml WuTao-server/pom.xml
+COPY Backend/WuTao-ai/pom.xml WuTao-ai/pom.xml
 RUN if [ "$AI_ENABLED" = "true" ]; then \
       mvn dependency:go-offline -B -Pwith-ai; \
     else \
@@ -31,7 +31,7 @@ RUN if [ "$AI_ENABLED" = "true" ]; then \
 # 运行阶段
 FROM eclipse-temurin:21-jre-alpine
 
-LABEL maintainer="feitwnd"
+LABEL maintainer="wutao"
 
 # 创建非root用户
 RUN addgroup -g 1000 appgroup && \
@@ -40,7 +40,7 @@ RUN addgroup -g 1000 appgroup && \
 WORKDIR /app
 
 # 复制构建好的JAR包
-COPY --from=builder /build/FeiTwnd-server/target/FeiTwnd-server-1.0-SNAPSHOT.jar ./feitwnd.jar
+COPY --from=builder /build/WuTao-server/target/WuTao-server-1.0-SNAPSHOT.jar ./wutao.jar
 
 # 创建日志目录
 RUN mkdir -p /app/logs && \
@@ -59,4 +59,4 @@ EXPOSE 5922
 
 # 启动命令
 # spring.profiles.active 由 docker-compose 环境变量 SPRING_PROFILES_ACTIVE 传入
-ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar feitwnd.jar"]
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar wutao.jar"]

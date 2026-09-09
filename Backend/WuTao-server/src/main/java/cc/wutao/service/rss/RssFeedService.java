@@ -1,0 +1,122 @@
+package cc.wutao.service.rss;
+
+import cc.wutao.properties.WebsiteProperties;
+import cc.wutao.result.PageResult;
+import cc.wutao.service.article.ArticleService;
+import cc.wutao.service.profile.PersonalInfoService;
+import cc.wutao.vo.BlogArticleDetailVO;
+import cc.wutao.vo.BlogArticleVO;
+import cc.wutao.vo.PersonalInfoVO;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+@Service
+@RequiredArgsConstructor
+public class RssFeedService {
+
+    private final ArticleService articleService;
+
+    private final PersonalInfoService personalInfoService;
+
+    private final WebsiteProperties websiteProperties;
+
+    private static final DateTimeFormatter RSS_DATE_FMT =
+            DateTimeFormatter.ofPattern("EEE, dd MMM yyyy HH:mm:ss '+0800'", java.util.Locale.ENGLISH);
+
+    /**
+     * 生成 RSS 2.0 Feed XML
+     */
+    public String generateRssFeed() {
+        String BLOG_BASE_URL = websiteProperties.getBlog();
+
+        // 获取个人信息作为站点信息
+        PersonalInfoVO info = personalInfoService.getPersonalInfo();
+        String siteName = info != null && info.getNickname() != null ? info.getNickname() + "的博客" : "WuTao Blog";
+        String siteDescription = info != null && info.getDescription() != null ? info.getDescription() : "个人博客";
+
+        // 获取最新20篇已发布文章
+        PageResult<BlogArticleVO> pageResult = articleService.getPublishedPage(1, 20);
+        List<BlogArticleVO> articles = pageResult.getRecords();
+
+        // 批量获取正文，避免循环内逐篇查询详情（N+1）
+        Map<String, BlogArticleDetailVO> contentMap = new HashMap<>();
+        if (articles != null && !articles.isEmpty()) {
+            List<String> slugs = articles.stream().map(BlogArticleVO::getSlug).toList();
+            for (BlogArticleDetailVO detail : articleService.getContentsBySlugs(slugs)) {
+                contentMap.put(detail.getSlug(), detail);
+            }
+        }
+
+        StringBuilder xml = new StringBuilder();
+        xml.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+        xml.append("<rss version=\"2.0\" xmlns:atom=\"http://www.w3.org/2005/Atom\" xmlns:content=\"http://purl.org/rss/1.0/modules/content/\">\n");
+        xml.append("  <channel>\n");
+        xml.append("    <title>").append(escapeXml(siteName)).append("</title>\n");
+        xml.append("    <link>").append(escapeXml(BLOG_BASE_URL)).append("</link>\n");
+        xml.append("    <description>").append(escapeXml(siteDescription)).append("</description>\n");
+        xml.append("    <language>zh-CN</language>\n");
+        xml.append("    <lastBuildDate>").append(LocalDateTime.now().format(RSS_DATE_FMT)).append("</lastBuildDate>\n");
+        xml.append("    <atom:link href=\"").append(escapeXml(BLOG_BASE_URL + "/rss"))
+                .append("\" rel=\"self\" type=\"application/rss+xml\"/>\n");
+
+        if (articles != null) {
+            for (BlogArticleVO article : articles) {
+                String articleUrl = BLOG_BASE_URL + "/article/" + article.getSlug();
+                xml.append("    <item>\n");
+                xml.append("      <title>").append(escapeXml(article.getTitle())).append("</title>\n");
+                xml.append("      <link>").append(escapeXml(articleUrl)).append("</link>\n");
+                xml.append("      <guid isPermaLink=\"true\">").append(escapeXml(articleUrl)).append("</guid>\n");
+                if (article.getSummary() != null) {
+                    xml.append("      <description>").append(escapeXml(article.getSummary())).append("</description>\n");
+                }
+
+                BlogArticleDetailVO detail = contentMap.get(article.getSlug());
+                String fullContent = detail != null
+                        ? (detail.getContentHtml() != null && !detail.getContentHtml().isBlank()
+                        ? detail.getContentHtml()
+                        : detail.getContentMarkdown())
+                        : null;
+                if (fullContent != null && !fullContent.isBlank()) {
+                    xml.append("      <content:encoded><![CDATA[")
+                            .append(wrapCData(fullContent))
+                            .append("]]></content:encoded>\n");
+                }
+
+                if (article.getCategoryName() != null) {
+                    xml.append("      <category>").append(escapeXml(article.getCategoryName())).append("</category>\n");
+                }
+                if (article.getPublishTime() != null) {
+                    xml.append("      <pubDate>").append(article.getPublishTime().format(RSS_DATE_FMT)).append("</pubDate>\n");
+                }
+                xml.append("    </item>\n");
+            }
+        }
+
+        xml.append("  </channel>\n");
+        xml.append("</rss>\n");
+        return xml.toString();
+    };
+
+    /**
+     * XML特殊字符转义
+     */
+    private String escapeXml(String text) {
+        if (text == null) return "";
+        return text.replace("&", "&amp;")
+                .replace("<", "&lt;")
+                .replace(">", "&gt;")
+                .replace("\"", "&quot;")
+                .replace("'", "&apos;");
+    }
+
+    private String wrapCData(String text) {
+        if (text == null) return "";
+        return text.replace("]]>", "]]]]><![CDATA[>");
+    }
+}

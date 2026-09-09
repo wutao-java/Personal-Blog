@@ -63,16 +63,15 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="blog-layout">
+  <div class="blog-layout" :class="{ 'music-layout': route.name === 'music' }">
     <BlogHeader />
     <HeroBanner
-      v-if="route.name !== 'music'"
       :cover-image="articleCover"
       :title="articleTitle"
       :meta="articleMeta"
     />
     <main class="blog-main">
-      <div class="main-inner" :class="{ 'music-main': route.name === 'music' }">
+      <div class="main-inner">
         <router-view v-slot="{ Component, route: viewRoute }">
           <transition name="page-fade" mode="out-in">
             <component :is="Component" :key="viewRoute.path" />
@@ -80,12 +79,12 @@ onUnmounted(() => {
         </router-view>
       </div>
     </main>
-    <BlogFooter />
+    <BlogFooter v-if="route.name !== 'music'" />
 
     <!-- 回到顶部 -->
     <transition name="backtop-fade">
       <button
-        v-show="showBackTop"
+        v-show="showBackTop && route.name !== 'music'"
         class="back-to-top"
         title="回到顶部"
         @click="scrollToTop"
@@ -113,6 +112,17 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
 }
+.blog-layout.music-layout {
+  --blog-bg: #f5f7fa;
+  --blog-card: #ffffff;
+  --blog-text: #303133;
+  --blog-text2: #606266;
+  --blog-text3: #909399;
+  --blog-border: #e4e7ed;
+  --blog-border-light: #ebeef5;
+  --blog-hover: #f5f7fa;
+  color-scheme: light;
+}
 .blog-main {
   flex: 1;
   width: 100%;
@@ -123,11 +133,6 @@ onUnmounted(() => {
   margin: 0 auto;
   padding: 32px 28px;
 }
-.main-inner.music-main {
-  max-width: none;
-  padding: 0 0 48px;
-}
-
 /* 页面切换过渡动画 */
 .page-fade-enter-active,
 .page-fade-leave-active {
@@ -186,9 +191,6 @@ onUnmounted(() => {
 @media (max-width: 768px) {
   .main-inner {
     padding: 20px 16px;
-  }
-  .main-inner.music-main {
-    padding: 0 0 32px;
   }
   .back-to-top {
     right: 16px;

@@ -1,8 +1,8 @@
 import * as SecureStore from 'expo-secure-store'
 import { Platform } from 'react-native'
 
-const TOKEN_KEY = 'feitwnd_admin_token'
-const ADMIN_ID_KEY = 'feitwnd_admin_id'
+const TOKEN_KEY = 'wutao_admin_token'
+const ADMIN_ID_KEY = 'wutao_admin_id'
 
 // SecureStore 不支持 Web，Web 上用 localStorage 兜底
 const webStorage =

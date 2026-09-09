@@ -152,7 +152,7 @@ const navTo = (item) => {
   <header
     class="site-header"
     :class="{
-      scrolled: scrolled || route.name === 'music',
+      scrolled,
       dark: themeStore.isDark && route.name !== 'music'
     }"
   >

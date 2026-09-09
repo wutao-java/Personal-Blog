@@ -1,6 +1,6 @@
 # 贡献指南
 
-感谢你对 FeiTwnd 项目的关注！欢迎通过以下方式参与贡献。
+感谢你对 WuTao 项目的关注！欢迎通过以下方式参与贡献。
 
 ## 报告 Bug
 
@@ -25,8 +25,8 @@
 
 ```bash
 # 1. Fork 本仓库并克隆到本地
-git clone https://github.com/FeiTwnd/FeiTwnd-Website.git
-cd FeiTwnd-Website
+git clone https://github.com/WuTao/WuTao-Website.git
+cd WuTao-Website
 
 # 2. 创建新分支
 git checkout -b feat/your-feature-name

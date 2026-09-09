@@ -8,15 +8,15 @@
         <version>3.5.7</version>
         <relativePath/>
     </parent>
-    <groupId>cc.feitwnd</groupId>
-    <artifactId>FeiTwndBackend</artifactId>
+    <groupId>cc.wutao</groupId>
+    <artifactId>WuTaoBackend</artifactId>
     <packaging>pom</packaging>
     <version>1.0-SNAPSHOT</version>
     <modules>
-        <module>FeiTwnd-common</module>
-        <module>FeiTwnd-pojo</module>
-        <module>FeiTwnd-extension-api</module>
-        <module>FeiTwnd-server</module>
+        <module>WuTao-common</module>
+        <module>WuTao-pojo</module>
+        <module>WuTao-extension-api</module>
+        <module>WuTao-server</module>
     </modules>
 
     <properties>
@@ -292,11 +292,11 @@
 
     <!-- 可插拔扩展模块：默认不构建，需显式激活对应 profile（如 -Pwith-ai）才会进入构建与打包 -->
     <profiles>
-        <!-- AI 模块：激活后构建 FeiTwnd-ai 并打进最终产物，未激活时完全不引入 langchain4j 依赖 -->
+        <!-- AI 模块：激活后构建 WuTao-ai 并打进最终产物，未激活时完全不引入 langchain4j 依赖 -->
         <profile>
             <id>with-ai</id>
             <modules>
-                <module>FeiTwnd-ai</module>
+                <module>WuTao-ai</module>
             </modules>
         </profile>
     </profiles>
