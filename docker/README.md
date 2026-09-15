@@ -44,22 +44,22 @@ cp docker/.env.example .env
 # ============================================
 # MySQL配置 (必须修改)
 # ============================================
-MYSQL_ROOT_PASSWORD=your_root_password_here
-MYSQL_PASSWORD=your_password_here
+MYSQL_ROOT_PASSWORD=
+MYSQL_PASSWORD=
 
 # ============================================
 # JWT密钥 (必须修改!)
 # ============================================
 # 使用随机字符串生成，至少32位
 # 可以使用: openssl rand -base64 32
-JWT_SECRET_KEY=your-very-long-random-secret-key-here-change-this
+JWT_SECRET_KEY=
 
 # ============================================
 # 阿里云OSS配置 (必须修改)
 # ============================================
 ALIOSS_ENDPOINT=oss-cn-shanghai.aliyuncs.com
-ALIOSS_ACCESS_KEY_ID=your-access-key-id
-ALIOSS_ACCESS_KEY_SECRET=your-access-key-secret
+ALIOSS_ACCESS_KEY_ID=
+ALIOSS_ACCESS_KEY_SECRET=
 ALIOSS_BUCKET_NAME=your-bucket-name
 
 # ============================================
@@ -71,7 +71,7 @@ EMAIL_FROM=your-email@example.com
 # ============================================
 # 访客登录验证码 (必须修改)
 # ============================================
-VISITOR_VERIFY_CODE=123456
+VISITOR_VERIFY_CODE=
 
 # ============================================
 # 网站URL配置 (替换为你的实际域名)
