@@ -7,6 +7,12 @@ server:
     include-message: never
     whitelabel:
       enabled: false
+  tomcat:
+    threads:
+      max: 50
+      min-spare: 5
+    accept-count: 10
+    max-connections: 50
 
 spring:
   threads:
@@ -25,12 +31,21 @@ spring:
     url: jdbc:mysql://${MYSQL_HOST:mysql}:${MYSQL_PORT:3306}/${MYSQL_DATABASE:WuTao}?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true
     username: ${MYSQL_USER:wutao}
     password: ${MYSQL_PASSWORD}
-    # Druid连接池专用配置
+    # Druid连接池专用配置（2G 内存服务器优化）
     druid:
-      initial-size: 5
-      min-idle: 5
-      max-active: 20
-      max-wait: 60000
+      initial-size: 2
+      min-idle: 2
+      max-active: 8
+      max-wait: 30000
+      # 连接保活检测：防止 MySQL 超时断开导致请求卡死
+      validation-query: SELECT 1
+      test-while-idle: true
+      test-on-borrow: false
+      test-on-return: false
+      time-between-eviction-runs-millis: 60000
+      min-evictable-idle-time-millis: 300000
+      keep-alive: true
+      keep-alive-between-time-millis: 60000
   data:
     redis:
       host: ${REDIS_HOST:redis}

@@ -49,10 +49,10 @@ RUN mkdir -p /app/logs && \
 # 切换到非root用户
 USER appuser
 
-# JVM参数
-# 4GB 内存的机器上还同时运行 MySQL/Redis/Nginx，堆上限收紧到 1GB，
-# 改用 G1（比 ZGC 预留的额外内存更少），并限制堆外内存，避免整机内存被耗尽
-ENV JAVA_OPTS="-XX:+UseG1GC -Xmx1024m -Xms256m -XX:MaxDirectMemorySize=256m -XX:MaxMetaspaceSize=256m -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/app/logs"
+# JVM参数（2G 内存服务器优化版）
+# 堆内存 384m + 元空间 192m + 直接内存 128m ≈ 700m，
+# 留出足够内存给 MySQL/Redis/Nginx/系统
+ENV JAVA_OPTS="-XX:+UseG1GC -Xms128m -Xmx384m -XX:MaxMetaspaceSize=192m -XX:MaxDirectMemorySize=128m -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/app/logs -XX:+ExitOnOutOfMemoryError"
 
 # 暴露端口
 EXPOSE 5922
