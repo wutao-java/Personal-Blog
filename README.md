@@ -474,13 +474,6 @@ docker compose logs -f
 
 欢迎提交 Issue 和 Pull Request！详见 [CONTRIBUTING.md](CONTRIBUTING.md)。
 
-## 交流与联系
-
-有问题、建议或想一起交流的，欢迎联系：
-
-- QQ：822824739
-- 交流群：1104658479
-
 ## 开源协议
 
 本项目采用 [MIT](LICENSE) 协议开源。
