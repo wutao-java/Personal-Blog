@@ -55,3 +55,156 @@ a {
 .muted-text {
   color: #909399;
 }
+
+@media (max-width: 767px) {
+  .admin-shell .page-main .toolbar {
+    align-items: stretch;
+    padding: 12px;
+  }
+
+  .admin-shell .page-main .toolbar-left,
+  .admin-shell .page-main .toolbar-right {
+    display: flex;
+    width: 100%;
+    min-width: 0;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .admin-shell .page-main .toolbar-left {
+    > .el-input,
+    > .el-select,
+    > .el-date-editor {
+      width: 100%;
+      min-width: 0;
+      flex: 1 1 130px;
+    }
+
+    > .search-input {
+      flex-basis: 100%;
+    }
+
+    > .el-radio-group {
+      max-width: 100%;
+      flex-wrap: wrap;
+    }
+  }
+
+  .admin-shell .page-main .toolbar-right .el-button {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .admin-shell .page-main :is(.toolbar, .tab-toolbar, .edit-actions) .el-button
+    + .el-button {
+    margin-left: 0;
+  }
+
+  .admin-shell .page-main .pagination-wrap {
+    justify-content: center;
+  }
+
+  .pagination-wrap .el-pagination {
+    --el-pagination-button-width: 28px;
+    --el-pagination-button-height: 32px;
+    max-width: 100%;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px 0;
+  }
+
+  .pagination-wrap .el-pagination > * {
+    margin: 0 4px;
+  }
+
+  .pagination-wrap .el-pagination .el-pager {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin: 0;
+  }
+
+  .admin-shell .el-table .el-table-fixed-column--left,
+  .admin-shell .el-table .el-table-fixed-column--right {
+    position: static !important;
+  }
+
+  .admin-shell .el-table .el-table-fixed-column--left::before,
+  .admin-shell .el-table .el-table-fixed-column--right::before {
+    display: none;
+  }
+
+  .el-dialog {
+    display: flex;
+    flex-direction: column;
+    max-width: calc(100vw - 24px);
+    max-height: calc(100vh - 24px);
+    max-height: calc(100dvh - 24px);
+    margin: 12px auto !important;
+    padding: 16px;
+  }
+
+  .el-dialog__header,
+  .el-dialog__footer {
+    flex-shrink: 0;
+  }
+
+  .el-dialog__body {
+    min-height: 0;
+    overflow-y: auto;
+    overflow-wrap: anywhere;
+    overscroll-behavior: contain;
+  }
+
+  .el-dialog .el-form-item,
+  .el-dialog .el-form--inline .el-form-item {
+    display: block;
+    margin-right: 0;
+  }
+
+  .el-dialog .el-form-item__label {
+    width: auto !important;
+    height: auto;
+    justify-content: flex-start;
+    padding: 0;
+    margin-bottom: 6px;
+    line-height: 22px;
+  }
+
+  .el-dialog .el-form-item__content {
+    min-width: 0;
+    margin-left: 0 !important;
+  }
+
+  .el-dialog .el-input,
+  .el-dialog .el-select,
+  .el-dialog .el-date-editor {
+    max-width: 100%;
+  }
+
+  .el-dialog .upload-row {
+    flex-wrap: wrap;
+  }
+
+  .el-dialog .upload-url-input {
+    flex-basis: 100%;
+  }
+
+  .el-dialog .el-descriptions__table {
+    table-layout: fixed;
+  }
+
+  .el-dialog__body img {
+    max-width: 100%;
+  }
+
+  .el-message,
+  .el-message-box {
+    max-width: calc(100vw - 24px);
+  }
+
+  .el-picker__popper {
+    max-width: calc(100vw - 24px);
+    overflow-x: auto;
+  }
+}

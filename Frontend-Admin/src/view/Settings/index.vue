@@ -462,4 +462,39 @@ const handleChangeEmail = async () => {
   align-items: center;
   gap: 10px;
 }
+
+@media (max-width: 767px) {
+  .settings-page {
+    padding: 12px;
+  }
+
+  .security-form :deep(.el-form-item) {
+    display: block;
+  }
+
+  .security-form :deep(.el-form-item__label) {
+    width: auto !important;
+    height: auto;
+    padding: 0;
+    margin-bottom: 6px;
+    line-height: 22px;
+  }
+
+  .security-form :deep(.el-form-item__content) {
+    margin-left: 0 !important;
+  }
+
+  .inline-action,
+  .code-row {
+    flex-wrap: wrap;
+    width: 100%;
+    gap: 8px;
+  }
+
+  .inline-action :deep(.el-input),
+  .code-row :deep(.el-input) {
+    flex: 1 1 100%;
+    max-width: none !important;
+  }
+}
 </style>

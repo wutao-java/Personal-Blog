@@ -970,4 +970,46 @@ onMounted(() => {
   margin-top: 8px;
   border: 1px solid #e4e7ed;
 }
+
+@media (max-width: 767px) {
+  .profile-page {
+    padding: 12px;
+  }
+
+  .personal-wrap {
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .personal-form {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .personal-form :deep(.el-form-item) {
+    display: block;
+  }
+
+  .personal-form :deep(.el-form-item__label) {
+    width: auto !important;
+    height: auto;
+    padding: 0;
+    margin-bottom: 6px;
+    line-height: 22px;
+  }
+
+  .personal-form :deep(.el-form-item__content) {
+    margin-left: 0 !important;
+  }
+
+  .tab-toolbar-left {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .tab-toolbar-left :deep(.el-radio-group) {
+    display: flex;
+    flex-wrap: wrap;
+  }
+}
 </style>

@@ -3,9 +3,17 @@ import { ref, computed, watch, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useUserStore } from '@/stores'
 import { getConfigByKey } from '@/api/settings'
+import { Menu } from '@element-plus/icons-vue'
+import { useMobile } from '@/composables/useMobile'
 
 const route = useRoute()
 const userStore = useUserStore()
+const { isMobile } = useMobile()
+const mobileMenuOpen = ref(false)
+
+watch(isMobile, (mobile) => {
+  if (!mobile) mobileMenuOpen.value = false
+})
 
 // 页面刷新时恢复用户信息（含role，用于游客检测）
 const footprintEnabled = ref(false)
@@ -27,6 +35,7 @@ onMounted(async () => {
 watch(
   () => route.path,
   () => {
+    mobileMenuOpen.value = false
     fetchFootprintEnabled()
   }
 )
@@ -100,7 +109,12 @@ const handleLogout = () => {
         </router-link>
       </nav>
 
-      <button class="collapse-btn" @click="collapsed = !collapsed">
+      <button
+        class="collapse-btn"
+        :aria-label="collapsed ? '展开侧栏' : '收起侧栏'"
+        :title="collapsed ? '展开侧栏' : '收起侧栏'"
+        @click="collapsed = !collapsed"
+      >
         <span
           :class="[
             'iconfont',
@@ -110,26 +124,64 @@ const handleLogout = () => {
       </button>
     </aside>
 
+    <el-drawer
+      v-model="mobileMenuOpen"
+      title="管理控制台"
+      direction="ltr"
+      size="min(280px, 85vw)"
+      class="mobile-nav-drawer"
+    >
+      <nav id="mobile-navigation" class="sidebar-nav mobile-nav">
+        <router-link
+          v-for="item in navItems"
+          :key="item.path"
+          :to="item.path"
+          :class="['nav-item', { active: activeMenu.startsWith(item.path) }]"
+          @click="mobileMenuOpen = false"
+        >
+          <span :class="['iconfont', item.icon]" />
+          <span class="nav-label">{{ item.label }}</span>
+        </router-link>
+      </nav>
+    </el-drawer>
+
     <!-- 右侧主区域 -->
     <div class="main-wrapper">
       <!-- 顶部栏 -->
       <header class="topbar">
-        <div class="topbar-breadcrumb">
-          <el-breadcrumb separator="/">
-            <el-breadcrumb-item :to="{ path: '/dashboard' }"
-              >首页</el-breadcrumb-item
-            >
-            <el-breadcrumb-item>{{ $route.meta.title }}</el-breadcrumb-item>
-          </el-breadcrumb>
+        <div class="topbar-left">
+          <button
+            class="mobile-menu-btn"
+            aria-label="打开导航菜单"
+            title="打开导航菜单"
+            aria-controls="mobile-navigation"
+            :aria-expanded="mobileMenuOpen"
+            @click="mobileMenuOpen = true"
+          >
+            <el-icon :size="22"><Menu /></el-icon>
+          </button>
+          <div class="topbar-breadcrumb">
+            <el-breadcrumb separator="/">
+              <el-breadcrumb-item :to="{ path: '/dashboard' }"
+                >首页</el-breadcrumb-item
+              >
+              <el-breadcrumb-item>{{ $route.meta.title }}</el-breadcrumb-item>
+            </el-breadcrumb>
+          </div>
         </div>
         <div class="topbar-right">
           <span class="user-name">
             <span class="iconfont icon-user" />
             {{ userStore.userInfo?.nickname || '管理员' }}
           </span>
-          <button class="logout-btn" @click="handleLogout">
+          <button
+            class="logout-btn"
+            aria-label="退出登录"
+            title="退出登录"
+            @click="handleLogout"
+          >
             <span class="iconfont icon-logout" />
-            退出
+            <span class="logout-label">退出</span>
           </button>
         </div>
       </header>
@@ -150,6 +202,7 @@ const handleLogout = () => {
 .admin-shell {
   display: flex;
   height: 100vh;
+  height: 100dvh;
   background-color: #f5f7fa;
 }
 
@@ -245,6 +298,7 @@ const handleLogout = () => {
 /* ---- 顶部栏 ---- */
 .main-wrapper {
   flex: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -265,6 +319,32 @@ const handleLogout = () => {
   display: flex;
   align-items: center;
   gap: 16px;
+}
+
+.topbar-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.mobile-menu-btn {
+  display: none;
+}
+
+.mobile-nav {
+  padding: 0;
+}
+
+.mobile-nav-drawer :deep(.el-drawer__header) {
+  margin-bottom: 0;
+  padding: 20px;
+  border-bottom: 1px solid #e4e7ed;
+}
+
+.mobile-nav-drawer :deep(.el-drawer__body) {
+  padding: 12px 0;
+  padding-bottom: max(12px, env(safe-area-inset-bottom));
 }
 
 .user-name {
@@ -301,6 +381,7 @@ const handleLogout = () => {
 /* ---- 主内容 ---- */
 .page-main {
   flex: 1;
+  min-height: 0;
   overflow-y: auto;
   padding: 24px;
 }
@@ -326,5 +407,87 @@ const handleLogout = () => {
 .page-fade-leave-to {
   opacity: 0;
   transform: translateY(-4px);
+}
+
+@media (max-width: 767px) {
+  .sidebar {
+    display: none;
+  }
+
+  .topbar {
+    height: 56px;
+    gap: 8px;
+    padding: 0 12px;
+  }
+
+  .topbar-left {
+    flex: 1;
+  }
+
+  .mobile-menu-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    color: #303133;
+    cursor: pointer;
+  }
+
+  .topbar-breadcrumb {
+    min-width: 0;
+  }
+
+  .topbar-breadcrumb :deep(.el-breadcrumb__item:first-child) {
+    display: none;
+  }
+
+  .topbar-breadcrumb :deep(.el-breadcrumb__inner) {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .topbar-right {
+    flex-shrink: 0;
+    gap: 8px;
+  }
+
+  .user-name {
+    display: block;
+    max-width: 72px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 13px;
+  }
+
+  .user-name .iconfont,
+  .logout-label {
+    display: none;
+  }
+
+  .logout-btn {
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    flex-shrink: 0;
+    font-size: 18px;
+  }
+
+  .page-main {
+    padding: 12px;
+    padding-bottom: max(12px, env(safe-area-inset-bottom));
+  }
+
+  .page-main.editor-page {
+    overflow-y: auto;
+  }
 }
 </style>

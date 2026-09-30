@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, shallowRef, watch } from 'vue'
+import { ref, onMounted, onBeforeUnmount, shallowRef, watch } from 'vue'
 import { useUserStore } from '@/stores'
 import {
   getOverview,
@@ -90,6 +90,7 @@ const viewChart = shallowRef(null)
 const visitorChart = shallowRef(null)
 const barChart = shallowRef(null)
 const pieChart = shallowRef(null)
+let chartResizeObserver
 
 const makeShortcuts = () => [
   {
@@ -268,6 +269,20 @@ const initCharts = () => {
   visitorChart.value = echarts.init(visitorChartEl.value)
   barChart.value = echarts.init(barChartEl.value)
   pieChart.value = echarts.init(pieChartEl.value)
+  chartResizeObserver = new ResizeObserver(() => {
+    viewChart.value?.resize()
+    visitorChart.value?.resize()
+    barChart.value?.resize()
+    pieChart.value?.resize()
+  })
+  for (const element of [
+    viewChartEl.value,
+    visitorChartEl.value,
+    barChartEl.value,
+    pieChartEl.value
+  ]) {
+    chartResizeObserver.observe(element)
+  }
   fetchViewChart()
   fetchVisitorChart()
   fetchBarChart()
@@ -296,6 +311,14 @@ onMounted(() => {
       }
     }
   )
+})
+
+onBeforeUnmount(() => {
+  chartResizeObserver?.disconnect()
+  viewChart.value?.dispose()
+  visitorChart.value?.dispose()
+  barChart.value?.dispose()
+  pieChart.value?.dispose()
 })
 </script>
 
@@ -497,7 +520,7 @@ onMounted(() => {
 
 .chart-row {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 16px;
 }
 
@@ -508,6 +531,7 @@ onMounted(() => {
 }
 
 .chart-card {
+  min-width: 0;
   background: #ffffff;
   border: 1px solid #e4e7ed;
   border-radius: 8px;
@@ -573,5 +597,59 @@ onMounted(() => {
   background: linear-gradient(90deg, #ebeef5 25%, #f5f7fa 50%, #ebeef5 75%);
   background-size: 200% 100%;
   animation: admin-sk-shimmer 1.5s ease-in-out infinite;
+}
+
+@media (max-width: 767px) {
+  .dashboard {
+    gap: 16px;
+  }
+
+  .stat-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .stat-card {
+    min-width: 0;
+    gap: 8px;
+    padding: 16px 12px;
+  }
+
+  .stat-icon,
+  .sk-stat-icon {
+    width: 28px;
+    height: 32px;
+  }
+
+  .stat-icon .iconfont {
+    font-size: 20px;
+  }
+
+  .stat-info {
+    min-width: 0;
+  }
+
+  .stat-value {
+    overflow-wrap: anywhere;
+    font-size: 20px;
+  }
+
+  .stat-label {
+    font-size: 12px;
+  }
+
+  .chart-card {
+    padding: 16px 12px;
+  }
+
+  .chart-header :deep(.el-date-editor) {
+    width: 100%;
+    min-width: 0;
+    flex: 0 0 100%;
+  }
+
+  .run-banner {
+    padding: 12px;
+  }
 }
 </style>

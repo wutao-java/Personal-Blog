@@ -108,11 +108,14 @@ const handleLogin = async () => {
   align-items: center;
   justify-content: center;
   min-height: 100vh;
+  min-height: 100dvh;
+  padding: 24px 16px;
   background-color: #f5f7fa;
 }
 
 .login-box {
-  width: 420px;
+  width: 100%;
+  max-width: 420px;
   background: #ffffff;
   border: 1px solid #e4e7ed;
   border-radius: 12px;
@@ -182,5 +185,19 @@ const handleLogin = async () => {
 
 :deep(.el-form-item) {
   margin-bottom: 20px;
+}
+
+@media (max-width: 767px) {
+  .login-box {
+    padding: 32px 24px 24px;
+  }
+
+  .login-header {
+    margin-bottom: 28px;
+  }
+
+  .login-form :deep(.el-input__inner) {
+    font-size: 16px;
+  }
 }
 </style>

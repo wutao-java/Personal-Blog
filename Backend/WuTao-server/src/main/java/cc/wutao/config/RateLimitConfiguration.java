@@ -89,7 +89,7 @@ public class RateLimitConfiguration {
         return now + ttl;
     }
 
-    private void cleanupIfNeeded(long now) {
+    public void cleanupIfNeeded(long now) {
         long last = lastCleanupTime.get();
         if (now - last < CLEANUP_INTERVAL_MS) {
             return;

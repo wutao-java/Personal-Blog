@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount, nextTick } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount, nextTick, watch } from 'vue'
 import { useRoute, useRouter, onBeforeRouteLeave } from 'vue-router'
 import { useArticleStore } from '@/stores'
 import { uploadFile } from '@/api/settings'
@@ -8,10 +8,12 @@ import { MdEditor } from 'md-editor-v3'
 import EmojiPicker from '@/components/EmojiPicker.vue'
 import AiCorrectionDialog from '@/components/AiCorrectionDialog.vue'
 import 'md-editor-v3/lib/style.css'
+import { useMobile } from '@/composables/useMobile'
 
 const route = useRoute()
 const router = useRouter()
 const articleStore = useArticleStore()
+const { isMobile } = useMobile()
 
 const isEdit = computed(() => !!route.params.id)
 
@@ -46,6 +48,9 @@ const uploadingEditorImages = ref(false)
 const draggingEditorImage = ref(false)
 const editorPanelRef = ref(null)
 const editorRef = ref(null)
+watch(isMobile, (mobile) => {
+  editorRef.value?.togglePreview(!mobile)
+})
 let editorDragDepth = 0
 
 /* ---- 图片上传（md-editor-v3 回调格式） ---- */
@@ -382,6 +387,7 @@ onBeforeUnmount(() => {
           ref="editorRef"
           v-model="form.contentMarkdown"
           preview-theme="github"
+          :preview="!isMobile"
           :toolbars-exclude="['mermaid', 'katex', 'github']"
           class="md-editor-fill"
           @on-upload-img="onUploadImg"
@@ -698,5 +704,66 @@ onBeforeUnmount(() => {
 }
 .cover-placeholder .iconfont {
   font-size: 22px;
+}
+
+@media (max-width: 767px) {
+  .article-edit {
+    height: auto;
+    min-height: 100%;
+  }
+
+  .edit-topbar {
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 12px;
+  }
+
+  .edit-actions {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .edit-actions :deep(.el-button) {
+    min-height: 36px;
+    flex: 1;
+  }
+
+  .title-row {
+    padding: 10px 12px;
+  }
+
+  .title-input :deep(.el-input__inner) {
+    font-size: 18px;
+  }
+
+  .edit-body {
+    flex: none;
+    flex-direction: column;
+    overflow: visible;
+  }
+
+  .editor-panel {
+    flex: none;
+    height: 60vh;
+    height: 60dvh;
+    min-height: 360px;
+  }
+
+  .editor-toolbar-emoji {
+    left: auto;
+    right: 8px;
+  }
+
+  .editor-panel :deep(.md-editor-toolbar-wrapper) {
+    width: calc(100% - 42px);
+  }
+
+  .edit-aside {
+    width: 100%;
+    overflow: visible;
+    border-left: none;
+    border-top: 1px solid #e4e7ed;
+    padding: 16px 12px;
+  }
 }
 </style>

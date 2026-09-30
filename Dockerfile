@@ -52,7 +52,17 @@ USER appuser
 # JVM参数（2G 内存服务器优化版）
 # 堆内存 384m + 元空间 192m + 直接内存 128m ≈ 700m，
 # 留出足够内存给 MySQL/Redis/Nginx/系统
-ENV JAVA_OPTS="-XX:+UseG1GC -Xms128m -Xmx384m -XX:MaxMetaspaceSize=192m -XX:MaxDirectMemorySize=128m -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/app/logs -XX:+ExitOnOutOfMemoryError"
+#
+# 内存释放相关参数：
+#   G1PeriodicGCInterval=3600000  —— 空闲时每小时触发一次 GC（JDK 12+ 特性）
+#   MaxHeapFreeRatio=40           —— GC 后若空闲堆 >40% 则归还给操作系统
+#   MinHeapFreeRatio=20           —— 维持至少 20% 空闲堆，避免频繁 GC
+#   UseStringDeduplication         —— G1 去重相同字符串，减少堆占用
+ENV JAVA_OPTS="-XX:+UseG1GC -Xms128m -Xmx384m -XX:MaxMetaspaceSize=192m -XX:MaxDirectMemorySize=128m \
+  -XX:MaxHeapFreeRatio=40 -XX:MinHeapFreeRatio=20 \
+  -XX:G1PeriodicGCInterval=3600000 \
+  -XX:+UseStringDeduplication \
+  -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/app/logs -XX:+ExitOnOutOfMemoryError"
 
 # 暴露端口
 EXPOSE 5922

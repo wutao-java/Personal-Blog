@@ -59,6 +59,10 @@ services:
         AI_ENABLED: ${AI_ENABLED:-false}
     container_name: wutao-backend
     restart: always
+    # 内存硬限制：JVM 堆 384m + 元空间 192m + 直接内存 128m + 线程栈/JIT/GC 开销 ≈ 800m
+    # 超过此限制 Docker 会 OOM Kill 并自动重启（配合 restart: always）
+    mem_limit: 768m
+    memswap_limit: 1g
     environment:
       SPRING_PROFILES_ACTIVE: docker
       TZ: Asia/Shanghai

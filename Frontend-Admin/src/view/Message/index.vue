@@ -2,10 +2,12 @@
 import { ref, onMounted, nextTick } from 'vue'
 import { useMessageStore, useUserStore } from '@/stores'
 import dayjs from 'dayjs'
+import { useMobile } from '@/composables/useMobile'
 import EmojiPicker from '@/components/EmojiPicker.vue'
 
 const messageStore = useMessageStore()
 const userStore = useUserStore()
+const { isMobile } = useMobile()
 
 const filterStatus = ref('')
 const page = ref(1)
@@ -255,7 +257,12 @@ onMounted(() => {
       width="540px"
       :close-on-click-modal="false"
     >
-      <el-descriptions v-if="detailRow" :column="2" border size="small">
+      <el-descriptions
+        v-if="detailRow"
+        :column="isMobile ? 1 : 2"
+        border
+        size="small"
+      >
         <el-descriptions-item label="昵称">{{
           detailRow.nickname ?? '-'
         }}</el-descriptions-item>
