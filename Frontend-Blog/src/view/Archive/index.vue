@@ -1,10 +1,7 @@
 <script setup>
 import { ref, inject, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
 import { getArticleArchive } from '@/api/article'
-import SidebarCard from '@/components/SidebarCard.vue'
 
-const router = useRouter()
 const { articleTitle, articleMeta } = inject('setHero')
 const yearGroups = ref([])
 const loading = ref(false)
@@ -23,7 +20,7 @@ const load = async () => {
       const items = (group.articles ?? []).map((a) => ({
         ...a,
         month: group.month,
-        displayDate: `${String(group.month).padStart(2, '0')}-${String(a.publishDay).padStart(2, '0')}`
+        displayDate: `${String(group.month).padStart(2, '0')}.${String(a.publishDay).padStart(2, '0')}`
       }))
       map.get(y).push(...items)
       count += items.length
@@ -46,8 +43,6 @@ const load = async () => {
   }
 }
 
-const goArticle = (slug) => router.push(`/article/${slug}`)
-
 onMounted(() => {
   articleTitle.value = '归档'
   articleMeta.value = '时光轴上的足迹'
@@ -59,7 +54,7 @@ onMounted(() => {
   <div class="archive-page">
     <div class="archive-layout">
       <div class="archive-main">
-        <div class="content-card">
+        <div class="archive-content">
           <div class="card-header">
             <i class="iconfont icon-guidang" />
             <span>共 {{ totalCount }} 篇文章</span>
@@ -71,20 +66,13 @@ onMounted(() => {
 
           <div v-else class="timeline">
             <div v-for="g in yearGroups" :key="g.year" class="year-group">
-              <h2 class="year-label">
-                <span class="year-dot" />
-                {{ g.year }}
-              </h2>
+              <h2 class="year-label">{{ g.year }}</h2>
               <ul class="year-list">
-                <li
-                  v-for="a in g.items"
-                  :key="a.id"
-                  class="archive-item"
-                  @click="goArticle(a.slug)"
-                >
-                  <span class="item-dot" />
-                  <span class="item-date">{{ a.displayDate }}</span>
-                  <span class="item-title">{{ a.title }}</span>
+                <li v-for="a in g.items" :key="a.id">
+                  <router-link :to="`/article/${a.slug}`" class="archive-item">
+                    <span class="item-date">{{ a.displayDate }}</span>
+                    <span class="item-title">{{ a.title }}</span>
+                  </router-link>
                 </li>
               </ul>
             </div>
@@ -93,8 +81,6 @@ onMounted(() => {
           <p v-if="!loading && !yearGroups.length" class="empty">暂无归档</p>
         </div>
       </div>
-
-      <SidebarCard />
     </div>
   </div>
 </template>
@@ -113,26 +99,17 @@ onMounted(() => {
   min-width: 0;
 }
 
-.content-card {
-  background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
-  border: 1px solid #ebeef5;
-  padding: 24px 28px;
-}
 .card-header {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 14px;
-  color: #909399;
-  margin-bottom: 20px;
-  padding-bottom: 14px;
-  border-bottom: 1px solid #ebeef5;
+  font-size: 13px;
+  color: var(--blog-text3);
+  margin-bottom: 18px;
 }
 .card-header .iconfont {
   font-size: 16px;
-  color: #606266;
+  color: var(--blog-text2);
 }
 
 .placeholder {
@@ -157,37 +134,19 @@ onMounted(() => {
 }
 
 .timeline {
-  position: relative;
-  padding-left: 20px;
-  border-left: 2px solid #e4e7ed;
-}
-.year-group {
-  margin-bottom: 24px;
-}
-.year-group:last-child {
-  margin-bottom: 0;
+  display: grid;
+  gap: 24px;
 }
 .year-label {
   font-family: var(--blog-serif);
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 700;
-  color: #303133;
+  color: var(--blog-text);
   margin: 0 0 12px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  position: relative;
-}
-.year-dot {
-  position: absolute;
-  left: -27px;
-  width: 12px;
-  height: 12px;
-  background: #303133;
-  border-radius: 50%;
-  border: 2px solid #fff;
 }
 .year-list {
+  display: grid;
+  gap: 8px;
   list-style: none;
   padding: 0;
   margin: 0;
@@ -195,48 +154,36 @@ onMounted(() => {
 .archive-item {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 8px 0;
-  cursor: pointer;
-  position: relative;
-  transition: background 0.15s;
-  border-radius: 6px;
-  padding-left: 4px;
+  gap: 24px;
+  min-height: 52px;
+  padding: 12px 24px;
+  background: var(--blog-card);
+  border-radius: 16px;
+  transition: background-color 0.15s;
 }
 .archive-item:hover {
-  background: #f5f7fa;
-}
-.archive-item:hover .item-title {
-  color: #303133;
-}
-.item-dot {
-  position: absolute;
-  left: -24px;
-  width: 6px;
-  height: 6px;
-  background: #c0c4cc;
-  border-radius: 50%;
-}
-.archive-item:hover .item-dot {
-  background: #303133;
+  background: var(--blog-hover);
 }
 .item-date {
-  flex-shrink: 0;
+  flex: 0 0 44px;
   font-size: 13px;
-  color: #909399;
+  color: var(--blog-text3);
   font-family: var(--blog-serif);
   font-variant-numeric: tabular-nums;
-  min-width: 48px;
+  white-space: nowrap;
 }
 .item-title {
-  font-size: 14px;
-  color: #606266;
-  transition: color 0.15s;
+  flex: 1;
+  min-width: 0;
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--blog-text);
+  overflow-wrap: anywhere;
 }
 
 .empty {
   text-align: center;
-  color: #909399;
+  color: var(--blog-text3);
   padding: 40px 0;
   font-size: 14px;
 }
@@ -250,8 +197,18 @@ onMounted(() => {
   }
 }
 @media (max-width: 600px) {
-  .content-card {
-    padding: 16px;
+  .archive-item {
+    gap: 14px;
+    min-height: 48px;
+    padding: 10px 16px;
+    border-radius: 14px;
+  }
+  .item-date {
+    flex-basis: 38px;
+    font-size: 12px;
+  }
+  .item-title {
+    font-size: 15px;
   }
 }
 </style>

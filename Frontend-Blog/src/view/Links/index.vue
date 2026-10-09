@@ -1,7 +1,6 @@
 <script setup>
 import { ref, inject, onMounted } from 'vue'
 import { getFriendLinks } from '@/api/friendLink'
-import SidebarCard from '@/components/SidebarCard.vue'
 
 const { articleTitle, articleMeta } = inject('setHero')
 
@@ -69,8 +68,6 @@ onMounted(() => {
           <p v-else class="empty">暂无友链</p>
         </div>
       </div>
-
-      <SidebarCard />
     </div>
   </div>
 </template>

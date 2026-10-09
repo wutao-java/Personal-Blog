@@ -5,13 +5,14 @@ import { getBlogReport } from '@/api/report'
 import { getCategories } from '@/api/category'
 import { getTags } from '@/api/tag'
 import { getMusicList } from '@/api/music'
+import { demoTracks, musicTracksOrDemo } from './demoMusic'
 
 export const useBlogStore = defineStore('blog', () => {
   const personalInfo = ref({})
   const report = ref({})
   const categories = ref([])
   const tags = ref([])
-  const musics = ref([])
+  const musics = ref(demoTracks)
   const loaded = ref(false)
 
   /* 通过 slug 反查分类 id */
@@ -68,7 +69,7 @@ export const useBlogStore = defineStore('blog', () => {
       tags.value = tagResult.value.data.data ?? []
     }
     if (musicResult.status === 'fulfilled') {
-      musics.value = musicResult.value.data.data ?? []
+      musics.value = musicTracksOrDemo(musicResult.value.data.data)
     }
 
     const failures = [

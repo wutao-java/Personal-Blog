@@ -1,7 +1,9 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { getConfigByKey } from '@/api/systemConfig'
+import { useBlogStore } from '@/stores'
 
+const blogStore = useBlogStore()
 const icpBeian = ref('')
 const gonganBeian = ref('')
 const startYear = ref('')
@@ -42,8 +44,8 @@ onMounted(async () => {
         >
       </div>
       <div class="footer-copy">
-        &copy; {{ startYear ? `${startYear}-` : '' }}{{ currentYear }} wutao.
-        All rights reserved.
+        &copy; {{ startYear ? `${startYear}-` : '' }}{{ currentYear }}
+        {{ blogStore.personalInfo.nickname || 'wutao' }}. All rights reserved.
       </div>
       <div class="footer-links">
         <a :href="sitemapUrl" target="_blank" rel="noopener">Sitemap</a>
@@ -56,14 +58,27 @@ onMounted(async () => {
 
 <style scoped>
 .site-footer {
-  background: var(--blog-card, #fff);
-  border-top: 1px solid var(--blog-border-light, #ebeef5);
+  background: transparent;
   color: var(--blog-text3, #909399);
   margin-top: auto;
 }
 .footer-inner {
+  max-width: 1144px;
+  margin: 0 auto;
+  border-top: 1px solid var(--blog-border);
   text-align: center;
-  padding: 14px 24px;
+  padding: 28px 0;
+  overflow-wrap: anywhere;
+}
+@media (max-width: 1200px) {
+  .footer-inner {
+    margin: 0 28px;
+  }
+}
+@media (max-width: 600px) {
+  .footer-inner {
+    margin: 0 18px;
+  }
 }
 .footer-beian {
   font-size: 12px;

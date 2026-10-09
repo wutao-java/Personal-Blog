@@ -8,7 +8,6 @@ import {
 } from '@/api/message'
 import { generateCaptcha } from '@/api/captcha'
 import { useVisitorStore, useBlogStore } from '@/stores'
-import SidebarCard from '@/components/SidebarCard.vue'
 import EmojiPicker from '@/components/EmojiPicker.vue'
 
 const visitorStore = useVisitorStore()
@@ -532,8 +531,6 @@ onMounted(() => {
           还没有留言，来写第一条吧
         </p>
       </div>
-
-      <SidebarCard />
     </div>
   </div>
 </template>

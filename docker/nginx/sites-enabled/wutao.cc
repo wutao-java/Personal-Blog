@@ -1,34 +1,9 @@
-# 主站: wutao.cc
+# 旧主页域名跳转到博客内的个人主页
 server {
     listen 80;
     server_name wutao.cc;
 
-    root /var/www/wutao.cc/html;
-    index index.html;
-
-    # 前端静态文件
-    location / {
-        try_files $uri $uri/ /index.html;
-    }
-
-    # 静态资源缓存
-    location ~* \.(css|js|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$ {
-        expires 1y;
-        add_header Cache-Control "public, immutable";
-    }
-
-    # API代理
-    location /api/ {
-        proxy_pass http://wutao_backend/;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-
-        proxy_connect_timeout 30s;
-        proxy_send_timeout 30s;
-        proxy_read_timeout 30s;
-    }
+    return 301 $scheme://blog.wutao.cc/about;
 }
 
 # 博客站: blog.wutao.cc
@@ -114,6 +89,18 @@ server {
 
     root /var/www/admin.wutao.cc/html;
     index index.html;
+
+    location = /api/admin/article-cover {
+        proxy_pass http://wutao_backend/admin/article-cover;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+
+        proxy_connect_timeout 30s;
+        proxy_send_timeout 30s;
+        proxy_read_timeout 300s;
+    }
 
     location / {
         try_files $uri $uri/ /index.html;

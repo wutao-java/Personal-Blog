@@ -217,6 +217,24 @@ create table articles(
     fulltext idx_fulltext(title,summary,content_markdown(500))
 ) comment '文章表';
 
+create table ai_cover_assets (
+    id varchar(36) primary key,
+    owner_id bigint not null,
+    article_id int null,
+    object_key varchar(255) not null,
+    image_url varchar(255) null,
+    status varchar(16) not null,
+    expires_at datetime not null,
+    retry_at datetime not null default current_timestamp,
+    create_time datetime not null default current_timestamp,
+    update_time datetime not null default current_timestamp on update current_timestamp,
+    unique key uk_ai_cover_object(object_key),
+    unique key uk_ai_cover_url(image_url),
+    index idx_ai_cover_article(article_id, status),
+    index idx_ai_cover_expiry(status, expires_at),
+    index idx_ai_cover_retry(status, retry_at)
+) engine=InnoDB comment 'AI article cover ownership and cleanup';
+
 -- 文章标签表
 create table article_tags(
     id int primary key auto_increment,

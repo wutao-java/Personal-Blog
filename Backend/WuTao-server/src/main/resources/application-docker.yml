@@ -94,7 +94,6 @@ wutao:
       max-dimension: ${IMAGE_COMPRESS_MAX_DIMENSION:2560}
   website:
     title: ${WEBSITE_TITLE:}
-    home: ${WEBSITE_HOME:}
     admin: ${WEBSITE_ADMIN:}
     cv: ${WEBSITE_CV:}
     blog: ${WEBSITE_BLOG:}
@@ -106,6 +105,14 @@ wutao:
     model-name: ${AI_MODEL_NAME:deepseek-chat}
     temperature: ${AI_TEMPERATURE:0.3}
     timeout-seconds: ${AI_TIMEOUT_SECONDS:180}
+    image:
+      enabled: ${AI_IMAGE_ENABLED:false}
+      endpoint: ${AI_IMAGE_ENDPOINT:}
+      api-key: ${AI_IMAGE_API_KEY:}
+      model-name: ${AI_IMAGE_MODEL_NAME:}
+      size: ${AI_IMAGE_SIZE:1536x1024}
+      response-format: ${AI_IMAGE_RESPONSE_FORMAT:}
+      timeout-seconds: ${AI_IMAGE_TIMEOUT_SECONDS:180}
 
 # MyBatis 配置
 mybatis:

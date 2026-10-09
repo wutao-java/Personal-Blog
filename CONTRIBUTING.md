@@ -62,7 +62,6 @@ git checkout -b fix/your-bug-fix
 **scope 范围（可选）：**
 - `blog` — 博客前端
 - `admin` — 管理端前端
-- `home` — 个人主页前端
 - `cv` — 简历前端
 - `app` — 移动端管理 App（Expo / React Native）
 - `backend` — 后端服务

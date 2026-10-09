@@ -5,6 +5,7 @@ WORKDIR /build
 
 # 是否启用AI摘要模块（默认关闭；启用时以 -Pwith-ai 构建，将 langchain4j 与 AI 模块打进产物）
 ARG AI_ENABLED=false
+ARG AI_IMAGE_ENABLED=false
 
 # 复制全部模块的pom文件并提前下载依赖（go-offline 需解析完整 reactor，子模块 pom 缺一不可；
 # AI_ENABLED=true 时同时预下载 langchain4j 依赖，加快后续构建）
@@ -14,7 +15,7 @@ COPY Backend/WuTao-pojo/pom.xml WuTao-pojo/pom.xml
 COPY Backend/WuTao-extension-api/pom.xml WuTao-extension-api/pom.xml
 COPY Backend/WuTao-server/pom.xml WuTao-server/pom.xml
 COPY Backend/WuTao-ai/pom.xml WuTao-ai/pom.xml
-RUN if [ "$AI_ENABLED" = "true" ]; then \
+RUN if [ "$AI_ENABLED" = "true" ] || [ "$AI_IMAGE_ENABLED" = "true" ]; then \
       mvn dependency:go-offline -B -Pwith-ai; \
     else \
       mvn dependency:go-offline -B; \
@@ -22,7 +23,7 @@ RUN if [ "$AI_ENABLED" = "true" ]; then \
 
 # 复制源代码并构建
 COPY Backend/ .
-RUN if [ "$AI_ENABLED" = "true" ]; then \
+RUN if [ "$AI_ENABLED" = "true" ] || [ "$AI_IMAGE_ENABLED" = "true" ]; then \
       mvn clean package -DskipTests -B -Pwith-ai; \
     else \
       mvn clean package -DskipTests -B; \

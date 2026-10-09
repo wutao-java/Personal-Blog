@@ -57,6 +57,7 @@ services:
       args:
         # 是否构建AI摘要模块（true 时镜像包含 langchain4j 与 AI 模块，包体增大；默认关闭）
         AI_ENABLED: ${AI_ENABLED:-false}
+        AI_IMAGE_ENABLED: ${AI_IMAGE_ENABLED:-false}
     container_name: wutao-backend
     restart: always
     # 内存硬限制：JVM 堆 384m + 元空间 192m + 直接内存 128m + 线程栈/JIT/GC 开销 ≈ 800m
@@ -96,7 +97,6 @@ services:
       VISITOR_VERIFY_CODE: ${VISITOR_VERIFY_CODE:?VISITOR_VERIFY_CODE is required}
       # 网站配置
       WEBSITE_TITLE: ${WEBSITE_TITLE}
-      WEBSITE_HOME: ${WEBSITE_HOME}
       WEBSITE_ADMIN: ${WEBSITE_ADMIN}
       WEBSITE_CV: ${WEBSITE_CV}
       WEBSITE_BLOG: ${WEBSITE_BLOG}
@@ -105,6 +105,13 @@ services:
       AI_BASE_URL: ${AI_BASE_URL:-https://api.deepseek.com/v1}
       AI_API_KEY: ${AI_API_KEY:-}
       AI_MODEL_NAME: ${AI_MODEL_NAME:-deepseek-chat}
+      AI_IMAGE_ENABLED: ${AI_IMAGE_ENABLED:-false}
+      AI_IMAGE_ENDPOINT: ${AI_IMAGE_ENDPOINT:-}
+      AI_IMAGE_API_KEY: ${AI_IMAGE_API_KEY:-}
+      AI_IMAGE_MODEL_NAME: ${AI_IMAGE_MODEL_NAME:-}
+      AI_IMAGE_SIZE: ${AI_IMAGE_SIZE:-1536x1024}
+      AI_IMAGE_RESPONSE_FORMAT: ${AI_IMAGE_RESPONSE_FORMAT:-}
+      AI_IMAGE_TIMEOUT_SECONDS: ${AI_IMAGE_TIMEOUT_SECONDS:-180}
     ports:
       - "5922:5922"
     networks:

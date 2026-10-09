@@ -1,12 +1,17 @@
 <script setup>
 import { ref, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { getArticlePage, searchArticles } from '@/api/article'
+import {
+  getArticlePage,
+  getArticlesByCategory,
+  searchArticles
+} from '@/api/article'
+import { useBlogStore } from '@/stores'
 import ArticleCard from '@/components/ArticleCard.vue'
-import SidebarCard from '@/components/SidebarCard.vue'
 
 const route = useRoute()
 const router = useRouter()
+const blogStore = useBlogStore()
 
 const articles = ref([])
 const total = ref(0)
@@ -14,24 +19,43 @@ const page = ref(1)
 const pageSize = 10
 const loading = ref(false)
 const searchKeyword = ref('')
+const selectedCategoryId = ref(null)
+let requestId = 0
 
 const loadArticles = async () => {
+  const currentRequestId = ++requestId
   loading.value = true
   try {
     let res
     if (searchKeyword.value) {
       res = await searchArticles(searchKeyword.value, page.value, pageSize)
+    } else if (selectedCategoryId.value !== null) {
+      res = await getArticlesByCategory(
+        selectedCategoryId.value,
+        page.value,
+        pageSize
+      )
     } else {
       res = await getArticlePage(page.value, pageSize)
     }
+    if (currentRequestId !== requestId) return
     const d = res.data.data
     articles.value = d.records ?? []
     total.value = d.total ?? 0
   } catch {
+    if (currentRequestId !== requestId) return
     articles.value = []
+    total.value = 0
   } finally {
-    loading.value = false
+    if (currentRequestId === requestId) loading.value = false
   }
+}
+
+const handleCategoryChange = (categoryId) => {
+  if (selectedCategoryId.value === categoryId) return
+  selectedCategoryId.value = categoryId
+  page.value = 1
+  loadArticles()
 }
 
 const handlePageChange = (p) => {
@@ -44,6 +68,7 @@ watch(
   () => route.query.search,
   (kw) => {
     searchKeyword.value = kw || ''
+    selectedCategoryId.value = null
     page.value = 1
     loadArticles()
   }
@@ -60,12 +85,46 @@ onMounted(() => {
     <div class="home-content">
       <!-- 左侧: 文章列表 -->
       <div class="article-col">
+        <div v-if="!searchKeyword" class="article-toolbar">
+          <div class="category-filters" role="group" aria-label="文章分类">
+            <button
+              type="button"
+              class="category-filter"
+              :class="{ active: selectedCategoryId === null }"
+              :aria-pressed="selectedCategoryId === null"
+              @click="handleCategoryChange(null)"
+            >
+              全部
+            </button>
+            <button
+              v-for="category in blogStore.categories"
+              :key="category.id"
+              type="button"
+              class="category-filter"
+              :class="{ active: selectedCategoryId === category.id }"
+              :aria-pressed="selectedCategoryId === category.id"
+              @click="handleCategoryChange(category.id)"
+            >
+              {{ category.name }}
+            </button>
+          </div>
+          <span class="article-count" role="status">
+            {{ loading ? '加载中...' : `共 ${total} 篇文章` }}
+          </span>
+        </div>
+
         <div v-if="searchKeyword" class="search-result-tip">
           <span
             >搜索: <strong>{{ searchKeyword }}</strong></span
           >
           <span class="search-count">{{ total }} 篇结果</span>
-          <a class="clear-search" @click="router.push('/')">&times; 清除</a>
+          <button
+            class="clear-search"
+            aria-label="清除搜索"
+            @click="router.push('/')"
+          >
+            &times; 清除
+          </button>
         </div>
 
         <div v-if="loading" class="loading-placeholder">
@@ -95,9 +154,6 @@ onMounted(() => {
 
         <div v-else class="empty-tip">暂无文章</div>
       </div>
-
-      <!-- 右侧: 侧边栏 -->
-      <SidebarCard />
     </div>
   </div>
 </template>
@@ -108,25 +164,74 @@ onMounted(() => {
 }
 .home-content {
   display: flex;
-  gap: 24px;
+  gap: 28px;
   align-items: flex-start;
 }
 .article-col {
   flex: 1;
   min-width: 0;
 }
+.article-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 22px;
+}
+.category-filters {
+  display: flex;
+  flex: 1;
+  flex-wrap: wrap;
+  gap: 2px;
+  min-width: 0;
+}
+.category-filter {
+  min-height: 42px;
+  max-width: 100%;
+  padding: 10px 14px;
+  border: 0;
+  border-radius: 12px;
+  background: none;
+  color: var(--blog-text2);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  overflow-wrap: anywhere;
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    color 0.15s;
+}
+.category-filter:hover:not(.active) {
+  background: var(--blog-hover);
+  color: var(--blog-text);
+}
+.category-filter.active {
+  background: var(--blog-text);
+  color: var(--blog-card);
+}
+.category-filter.active:focus-visible {
+  outline-color: var(--blog-card);
+  outline-offset: -4px;
+}
+.article-count {
+  flex-shrink: 0;
+  color: var(--blog-text3);
+  font-size: 13px;
+  white-space: nowrap;
+}
 
 /* 搜索提示 */
 .search-result-tip {
   padding: 12px 16px;
   font-size: 14px;
-  color: #606266;
-  background: #fff;
-  border-radius: 8px;
-  border: 1px solid #ebeef5;
+  color: var(--blog-text2);
+  background: var(--blog-card);
+  border-radius: 18px;
+  border: 1px solid var(--blog-border);
   margin-bottom: 16px;
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 8px;
 }
 .search-count {
@@ -134,7 +239,10 @@ onMounted(() => {
   font-size: 13px;
 }
 .clear-search {
-  color: #303133;
+  color: var(--blog-accent);
+  background: none;
+  border: 0;
+  font: inherit;
   cursor: pointer;
   font-weight: 600;
   margin-left: auto;
@@ -153,10 +261,11 @@ onMounted(() => {
   display: flex;
   gap: 16px;
   padding: 20px;
-  background: #fff;
-  border-radius: 8px;
-  margin-bottom: 16px;
-  border: 1px solid #ebeef5;
+  flex-direction: row-reverse;
+  background: var(--blog-card);
+  border-radius: 26px;
+  margin-bottom: 20px;
+  border: 1px solid var(--blog-border);
 }
 .skeleton-cover {
   width: 200px;
@@ -208,8 +317,34 @@ onMounted(() => {
   .home-content {
     flex-direction: column;
   }
+  .article-col {
+    width: 100%;
+  }
 }
 @media (max-width: 600px) {
+  .article-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+    margin-bottom: 18px;
+  }
+  .category-filters {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    gap: 2px;
+  }
+  .category-filter {
+    flex: none;
+    max-width: none;
+    min-height: 40px;
+    padding: 9px 12px;
+    font-size: 13px;
+    white-space: nowrap;
+  }
+  .article-count {
+    align-self: flex-end;
+    font-size: 12px;
+  }
   .search-result-tip {
     font-size: 13px;
     padding: 10px 12px;

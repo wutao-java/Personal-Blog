@@ -2,166 +2,182 @@
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { useBlogStore } from '@/stores'
-import bgcImg from '@/assets/images/bgc.webp'
 
 const route = useRoute()
 const blogStore = useBlogStore()
-
-const props = defineProps({
-  /** 文章封面 (文章详情页传入) */
+defineProps({
   coverImage: { type: String, default: '' },
-  /** 文章标题 */
   title: { type: String, default: '' },
-  /** 文章 meta 信息 */
-  meta: { type: String, default: '' }
+  meta: { type: String, default: '' },
+  hasToc: { type: Boolean, default: false }
 })
-
 const isHome = computed(() => route.name === 'home')
-
-const bgImage = computed(() => {
-  if (props.coverImage) return props.coverImage
-  return bgcImg
-})
 </script>
 
 <template>
-  <div class="hero-banner" :style="{ backgroundImage: `url(${bgImage})` }">
-    <div class="hero-overlay" />
-    <div class="hero-fade" />
+  <section
+    class="hero-banner"
+    :class="{
+      'article-heading': route.name === 'article',
+      'article-with-toc': route.name === 'article' && hasToc
+    }"
+  >
     <div class="hero-content">
-      <!-- 主页: 显示个人信息 -->
+      <p class="heading-caption">
+        {{
+          isHome
+            ? '文字与生活'
+            : (blogStore.personalInfo.nickname || 'WuTao') +
+              ' / ' +
+              (route.meta.title || '')
+        }}
+      </p>
       <template v-if="isHome">
         <h1 class="hero-title">
-          {{ blogStore.personalInfo.nickname }}
+          {{ blogStore.personalInfo.nickname || 'WuTao' }} 的博客<span
+            class="heading-dot"
+            >.</span
+          >
         </h1>
         <p class="hero-desc">
-          随便坐坐，看看我写的字 —— 些许技术、心得、生活日常和胡思乱想。
+          随便坐坐，看看我写的字。些许技术、心得、生活日常和胡思乱想。
         </p>
       </template>
-      <!-- 自定义标题 (文章/分类/标签等) -->
-      <template v-else-if="title">
-        <h1 class="hero-article-title">{{ title }}</h1>
+      <template v-else>
+        <h1 class="hero-page-title">
+          {{ title || route.meta.title || ''
+          }}<span class="heading-dot">.</span>
+        </h1>
         <p v-if="meta" class="hero-article-meta" v-html="meta" />
       </template>
-      <!-- 其他页面: 显示路由 meta 标题 -->
-      <template v-else>
-        <h1 class="hero-page-title">{{ $route.meta.title || '' }}</h1>
-      </template>
+      <img
+        v-if="route.name === 'article' && coverImage"
+        :src="coverImage"
+        :alt="title"
+        class="article-cover"
+      />
     </div>
-  </div>
+  </section>
 </template>
 
 <style scoped>
 .hero-banner {
-  position: relative;
   width: 100%;
-  height: 40vh;
-  min-height: 280px;
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-}
-.hero-overlay {
-  position: absolute;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.35);
-  z-index: 1;
-}
-.hero-fade {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 80px;
-  background: linear-gradient(to bottom, transparent, var(--blog-bg));
-  z-index: 2;
-  pointer-events: none;
+  padding: 145px 28px 36px;
 }
 .hero-content {
-  position: relative;
-  z-index: 3;
-  text-align: center;
-  color: #fff;
-  padding: 0 24px;
-  max-width: 600px;
+  max-width: 1144px;
+  margin: 0 auto;
 }
-.hero-title {
-  font-family: var(--blog-serif);
-  font-size: 34px;
-  font-weight: 800;
-  margin: 0 0 10px;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
-  letter-spacing: 1px;
-}
-.hero-desc {
-  font-size: 16px;
-  margin: 0;
-  opacity: 0.9;
-  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
-  line-height: 1.6;
-}
-.hero-article-title {
-  font-family: var(--blog-serif);
-  font-size: 30px;
-  font-weight: 800;
-  margin: 0 0 10px;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
-  line-height: 1.35;
-}
-.hero-article-meta {
-  font-size: 14px;
-  margin: 0;
-  opacity: 0.85;
-  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+.heading-caption {
   display: flex;
   align-items: center;
-  justify-content: center;
+  gap: 10px;
+  margin: 0 0 17px;
+  color: var(--blog-text2);
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+.heading-caption::before {
+  content: '';
+  width: 20px;
+  height: 1px;
+  background: var(--blog-accent);
+  flex-shrink: 0;
+}
+.hero-title,
+.hero-page-title {
+  margin: 0 0 15px;
+  color: var(--blog-text);
+  font-size: 42px;
+  line-height: 1.4;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+.heading-dot {
+  color: var(--blog-accent);
+  margin-left: 3px;
+}
+.hero-desc {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.9;
+  color: var(--blog-text2);
+}
+.hero-article-meta {
+  display: flex;
   flex-wrap: wrap;
-  gap: 4px 5px;
+  align-items: center;
+  gap: 5px 8px;
+  margin: 0;
+  color: var(--blog-text2);
+  font-size: 13px;
+  line-height: 1.9;
 }
 .hero-article-meta :deep(.meta-item) {
   display: inline-flex;
   align-items: center;
-  gap: 3px;
+  gap: 5px;
+  overflow-wrap: anywhere;
+  min-width: 0;
 }
 .hero-article-meta :deep(.meta-dot) {
-  opacity: 0.5;
-  margin: 0 1px;
+  color: var(--blog-text3);
 }
-.hero-article-meta :deep(.iconfont) {
-  font-size: 13px;
+.article-cover {
+  display: block;
+  width: 100%;
+  height: 300px;
+  margin-top: 28px;
+  border-radius: 26px;
+  object-fit: cover;
 }
-.hero-page-title {
-  font-family: var(--blog-serif);
-  font-size: 32px;
-  font-weight: 800;
-  margin: 0;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+.article-heading .hero-content {
+  max-width: 800px;
 }
-
-@media (max-width: 768px) {
-  .hero-banner {
-    height: 30vh;
-    min-height: 200px;
+.article-heading.article-with-toc .hero-content {
+  max-width: 1144px;
+  padding-right: 284px;
+}
+.article-heading .hero-page-title {
+  font-size: 36px;
+}
+@media (max-width: 960px) {
+  .article-heading.article-with-toc .hero-content {
+    padding-right: 0;
   }
-  .hero-title {
-    font-size: 24px;
+}
+@media (max-width: 768px) {
+  .hero-banner.article-heading {
+    padding-inline: 18px;
+  }
+}
+@media (max-width: 600px) {
+  .hero-banner {
+    padding: 111px 22px 26px;
+  }
+  .heading-caption {
+    font-size: 11px;
+    margin-bottom: 13px;
+  }
+  .hero-title,
+  .hero-page-title {
+    font-size: 30px;
+    margin-bottom: 12px;
   }
   .hero-desc {
-    font-size: 14px;
+    font-size: 13px;
   }
-  .hero-article-title {
-    font-size: 22px;
+  .article-heading .hero-page-title {
+    font-size: 27px;
   }
-  .hero-page-title {
-    font-size: 24px;
+  .hero-article-meta {
+    font-size: 12px;
   }
-  .hero-fade {
-    height: 50px;
+  .article-cover {
+    height: 200px;
+    border-radius: 20px;
+    margin-top: 22px;
   }
 }
 </style>

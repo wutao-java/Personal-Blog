@@ -20,7 +20,8 @@ const route = useRoute()
 const visitorStore = useVisitorStore()
 const blogStore = useBlogStore()
 const themeStore = useThemeStore()
-const { articleCover, articleTitle, articleMeta } = inject('setHero')
+const { articleCover, articleTitle, articleMeta, articleHasToc } =
+  inject('setHero')
 
 /* MdPreview 暗黑模式适配 */
 const previewTheme = computed(() => {
@@ -89,6 +90,7 @@ const loadArticle = async (slug) => {
   try {
     const res = await getArticleBySlug(slug)
     article.value = res.data.data
+    articleHasToc.value = hasToc.value
     document.title = `${article.value.title} - wutao`
     // 更新 Hero
     articleTitle.value = article.value.title
@@ -907,27 +909,130 @@ onMounted(() => {
 }
 
 .article-content {
+  font-family: var(--blog-sans);
+  font-size: 15.5px;
+  line-height: 1.85;
+  color: var(--blog-text, #333);
   word-break: break-word;
 }
 
 .article-content :deep(.md-editor) {
+  font-family: inherit;
+  color: inherit;
   background: transparent !important;
   border: none;
 }
 .article-content :deep(.md-editor-preview-wrapper) {
   padding: 0;
 }
-.article-content :deep(.md-editor-preview) {
-  font-size: 15.5px;
-  line-height: 1.85;
-  color: var(--blog-text, #333);
+.article-content :deep(.md-editor-preview),
+.fallback-content {
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  color: inherit;
+  word-break: inherit;
+}
+
+.article-content :deep(h1),
+.article-content :deep(h2),
+.article-content :deep(h3),
+.article-content :deep(h4),
+.article-content :deep(h5),
+.article-content :deep(h6) {
+  color: var(--blog-text, #303133);
+  margin: 28px 0 12px;
+  padding: 0;
+  border: none;
+  font-weight: 700;
+  line-height: 1.4;
+  word-break: inherit;
+}
+.article-content :deep(h1) {
+  font-size: 2em;
+}
+.article-content :deep(h2) {
+  font-size: 1.5em;
+}
+.article-content :deep(h3) {
+  font-size: 1.25em;
+}
+.article-content :deep(h4) {
+  font-size: 1em;
+}
+.article-content :deep(h5) {
+  font-size: 0.875em;
+}
+.article-content :deep(h6) {
+  font-size: 0.85em;
+}
+.article-content :deep(p),
+.article-content :deep(ul),
+.article-content :deep(ol) {
+  margin: 0 0 16px;
+}
+.article-content :deep(ul),
+.article-content :deep(ol) {
+  padding-left: 2em;
+}
+.article-content :deep(li + li) {
+  margin-top: 0.25em;
+}
+.article-content :deep(a) {
+  color: var(--blog-accent);
+}
+.article-content :deep(a:hover) {
+  text-decoration: underline;
+}
+.article-content :deep(blockquote) {
+  margin: 16px 0;
+  padding: 10px 16px;
+  border-left: 3px solid var(--blog-accent);
+  background: var(--blog-hover);
+  color: var(--blog-text2);
+}
+.article-content :deep(blockquote > :last-child) {
+  margin-bottom: 0;
+}
+.article-content :deep(.md-editor-preview > :first-child),
+.fallback-content :deep(> :first-child) {
+  margin-top: 0;
 }
 
 .article-content :deep(table) {
   display: block;
   max-width: 100%;
+  border-collapse: collapse;
+  margin: 16px 0;
+  font-size: inherit;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
+}
+.article-content :deep(th),
+.article-content :deep(td) {
+  border: 1px solid var(--blog-border);
+  padding: 8px 12px;
+}
+.article-content :deep(th) {
+  background: var(--blog-hover);
+  font-weight: 600;
+}
+.article-content :deep(tr) {
+  background: transparent;
+}
+.article-content :deep(tbody tr:nth-child(even)) {
+  background: var(--blog-hover);
+}
+.article-content :deep(code) {
+  font-family: Consolas, 'Courier New', monospace;
+}
+.article-content :deep(:not(pre) > code) {
+  background: var(--blog-hover);
+  color: var(--blog-text);
+  padding: 2px 5px;
+  border-radius: 3px;
+  font-size: 0.9em;
+  line-height: inherit;
 }
 
 /* 图片圆角 */
@@ -936,20 +1041,7 @@ onMounted(() => {
   border-radius: 6px;
   margin: 8px 0;
 }
-/* 回退 v-html 用的极简样式 */
-.fallback-content {
-  font-size: 15.5px;
-  line-height: 1.85;
-  color: var(--blog-text, #333);
-}
-.fallback-content :deep(h1),
-.fallback-content :deep(h2),
-.fallback-content :deep(h3),
-.fallback-content :deep(h4) {
-  color: var(--blog-text, #303133);
-  margin: 28px 0 12px;
-  font-weight: 700;
-}
+/* HTML 回退保留独立的代码块样式，正文共用上面的排版。 */
 .fallback-content :deep(pre) {
   background: #282c34;
   color: #abb2bf;
@@ -965,41 +1057,6 @@ onMounted(() => {
   padding: 0;
   color: inherit;
 }
-.fallback-content :deep(code) {
-  background: #f5f7fa;
-  padding: 2px 5px;
-  border-radius: 3px;
-  font-size: 14px;
-}
-.fallback-content :deep(img) {
-  max-width: 100%;
-  border-radius: 6px;
-  margin: 8px 0;
-}
-.fallback-content :deep(blockquote) {
-  margin: 14px 0;
-  padding: 10px 16px;
-  border-left: 3px solid #303133;
-  background: #f5f7fa;
-  color: #606266;
-}
-.fallback-content :deep(table) {
-  width: 100%;
-  border-collapse: collapse;
-  margin: 14px 0;
-  font-size: 14px;
-}
-.fallback-content :deep(th),
-.fallback-content :deep(td) {
-  border: 1px solid #e4e7ed;
-  padding: 8px 12px;
-  text-align: left;
-}
-.fallback-content :deep(th) {
-  background: #f5f7fa;
-  font-weight: 600;
-}
-
 /* 点赞+转发 */
 .article-actions-inline {
   display: flex;

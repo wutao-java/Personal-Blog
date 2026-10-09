@@ -38,6 +38,10 @@ public class ArticleDTO {
     // 封面图片url
     private String coverImage;
 
+    // 用户在预览中采用的 AI 候选封面ID；上传图片不传此字段
+    @Size(max = 36, message = "候选封面ID格式不正确")
+    private String aiCoverId;
+
     // Markdown内容
     @NotBlank(message = "文章内容不能为空")
     private String contentMarkdown;

@@ -10,8 +10,6 @@ import org.springframework.stereotype.Component;
 public class WebsiteProperties {
     // 网站标题
     private String title;
-    // 主页地址
-    private String home;
     // 管理端地址
     private String admin;
     // 简历地址

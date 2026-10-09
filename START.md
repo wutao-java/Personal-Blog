@@ -70,12 +70,9 @@ docker compose --env-file .env config --quiet
 
 ## 3. 构建前端
 
-分别安装依赖并构建四个前端：
+分别安装依赖并构建三个前端，个人主页已包含在博客端中：
 
 ```bash
-pnpm --dir Frontend-Home install
-pnpm --dir Frontend-Home build
-
 pnpm --dir Frontend-Blog install
 pnpm --dir Frontend-Blog build
 
@@ -90,12 +87,13 @@ pnpm --dir Frontend-Admin build
 
 | 前端模块 | Nginx 静态文件目录 |
 | --- | --- |
-| `Frontend-Home/dist` | `docker/html/wutao.cc/html` |
 | `Frontend-Blog/dist` | `docker/html/blog.wutao.cc/html` |
 | `Frontend-Cv/dist` | `docker/html/cv.wutao.cc/html` |
 | `Frontend-Admin/dist` | `docker/html/admin.wutao.cc/html` |
 
 如果使用自己的域名，需要同时修改 `docker/nginx/sites-enabled/wutao.cc` 中的 `server_name`、`root`，以及 `.env` 中的 `WEBSITE_*` 地址。
+
+个人主页访问博客域名的 `/about`，旧 `/home` 自动跳转到该地址。默认 Nginx 配置将旧主页域名重定向到博客 `/about`；使用自己的域名时需同步修改跳转目标，不要移除博客站点的 `try_files` 回退规则。
 
 ## 4. 启动服务
 

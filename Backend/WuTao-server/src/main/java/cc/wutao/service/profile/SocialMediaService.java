@@ -3,7 +3,6 @@ package cc.wutao.service.profile;
 import cc.wutao.dto.SocialMediaDTO;
 import cc.wutao.entity.SocialMedia;
 import cc.wutao.mapper.SocialMediaMapper;
-import cc.wutao.vo.SocialMediaVO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.cache.annotation.CacheEvict;
@@ -18,27 +17,6 @@ import java.util.List;
 public class SocialMediaService {
 
     private final SocialMediaMapper socialMediaMapper;
-
-    /**
-     * 获取可见社交媒体信息
-     * @return
-     */
-    @Cacheable(value = "socialMedia", key = "'visible'")
-    public List<SocialMediaVO> getVisibleSocialMedia() {
-        // 获取数据库数据
-        List<SocialMedia> socialMediaList = socialMediaMapper.getVisibleSocialMedia();
-        // 转换为VO
-        if (socialMediaList != null && socialMediaList.size() > 0) {
-            return socialMediaList.stream().map(socialMedia -> SocialMediaVO.builder()
-                    .id(socialMedia.getId())
-                    .name(socialMedia.getName())
-                    .icon(socialMedia.getIcon())
-                    .link(socialMedia.getLink())
-                    .sort(socialMedia.getSort())
-                    .build()).toList();
-        }
-        return Collections.emptyList();
-    }
 
     /**
      * 获取所有社交媒体信息

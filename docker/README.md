@@ -77,7 +77,6 @@ VISITOR_VERIFY_CODE=
 # 网站URL配置 (替换为你的实际域名)
 # ============================================
 WEBSITE_TITLE=YourSiteTitle
-WEBSITE_HOME=https://example.com
 WEBSITE_ADMIN=https://admin.example.com
 WEBSITE_CV=https://cv.example.com
 WEBSITE_BLOG=https://blog.example.com
@@ -94,11 +93,7 @@ WEBSITE_BLOG=https://blog.example.com
 构建前端项目后，将静态文件放入对应目录：
 
 ```bash
-# 主站
-mkdir -p docker/html/example.com/html
-cp -r ../Frontend-Home/dist/* docker/html/example.com/html/
-
-# 博客
+# 博客和个人主页（/about）
 mkdir -p docker/html/blog.example.com/html
 cp -r ../Frontend-Blog/dist/* docker/html/blog.example.com/html/
 
@@ -112,6 +107,8 @@ cp -r ../Frontend-Admin/dist/* docker/html/admin.example.com/html/
 ```
 
 > 目录名中的域名（如 `blog.example.com`）必须与 `docker/nginx/sites-enabled/` 配置里的 `server_name` 和 `root` 保持一致（默认配置为 `wutao.cc` 系列域名，使用自己的域名时请统一修改）。
+
+个人主页位于博客端的 `/about`，旧 `/home` 自动跳转到该地址。默认 Nginx 配置将旧主页域名重定向到博客 `/about`，不再需要独立主页产物。使用自己的域名时需同步修改 `return 301` 中的跳转目标；旧域名如仍提供 HTTPS，还需保留其证书和 HTTPS 重定向配置。
 
 ### 4. 构建并启动服务
 
@@ -157,7 +154,6 @@ docker exec -it wutao-nginx sh
 apk add certbot python3
 
 # 申请证书（需要域名已解析）
-certbot certonly --webroot -w /var/www/example.com/html -d example.com
 certbot certonly --webroot -w /var/www/blog.example.com/html -d blog.example.com
 certbot certonly --webroot -w /var/www/cv.example.com/html -d cv.example.com
 certbot certonly --webroot -w /var/www/admin.example.com/html -d admin.example.com
@@ -205,7 +201,6 @@ server {
 | `EMAIL_FROM` | 是 | 邮件发送者邮箱 | - |
 | `VISITOR_VERIFY_CODE` | 是 | 访客登录验证码 | - |
 | `WEBSITE_TITLE` | 否 | 网站标题 | - |
-| `WEBSITE_HOME` | 否 | 首页地址 | - |
 | `WEBSITE_ADMIN` | 否 | 管理后台地址 | - |
 | `WEBSITE_CV` | 否 | 简历地址 | - |
 | `WEBSITE_BLOG` | 否 | 博客地址 | - |

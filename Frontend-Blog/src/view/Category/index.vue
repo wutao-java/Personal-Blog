@@ -4,7 +4,6 @@ import { useRoute } from 'vue-router'
 import { getArticlesByCategory } from '@/api/article'
 import { useBlogStore } from '@/stores'
 import ArticleCard from '@/components/ArticleCard.vue'
-import SidebarCard from '@/components/SidebarCard.vue'
 
 const route = useRoute()
 const blogStore = useBlogStore()
@@ -105,8 +104,6 @@ onMounted(async () => {
           <p class="empty">该分类下暂无文章</p>
         </div>
       </div>
-
-      <SidebarCard />
     </div>
   </div>
 </template>

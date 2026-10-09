@@ -11,7 +11,7 @@
 
 # WuTao — 个人全栈网站
 
-一套基于 **Spring Boot 3 + Vue 3 + Expo (React Native)** 的个人网站全栈解决方案，包含博客、后台管理、个人主页、在线简历四个 Web 子站点、一个移动端管理 App，以及一个统一后端服务。
+一套基于 **Spring Boot 3 + Vue 3 + Expo (React Native)** 的个人网站全栈解决方案，包含博客（含个人主页）、后台管理、在线简历三个 Web 子站点、一个移动端管理 App，以及一个统一后端服务。
 
 > 在线演示：[blog.wutao.cc](https://blog.wutao.cc) · [wutao.cc](https://wutao.cc) · [cv.wutao.cc](https://cv.wutao.cc)
 
@@ -20,6 +20,7 @@
 ## 功能特性
 
 ### 博客端 (Frontend-Blog)
+- 个人主页（`/about`），与博客共用导航、构建产物和主题；旧 `/home` 自动跳转
 - Markdown 文章渲染（md-editor-v3 预览，与管理端编辑效果一致）
 - 文章分类 / 标签 / 归档 / 全文搜索
 - 评论系统（嵌套回复、Markdown、悄悄话、邮件通知）
@@ -49,10 +50,10 @@
 - 操作日志
 - AI 摘要生成（可选扩展模块：写文章时可勾选，发布后异步调用大模型生成摘要并回填）
 
-### 个人主页 (Frontend-Home)
-- 个人信息展示
-- 社交媒体链接
-- 简洁大气的单页设计
+### 个人主页 (Frontend-Blog `/about`)
+- 个人与博客介绍
+- 联系方式和留言入口
+- 旧 `/home` 地址自动跳转到 `/about`，无需独立主页工程
 
 ### 在线简历 (Frontend-Cv)
 - 教育 / 工作 / 项目经历展示
@@ -75,14 +76,15 @@
 ```
 ┌─────────────────────────────────────────────────────────┐
 │                      Nginx 反向代理                       │
-│  blog.xxx.cc  home.xxx.cc  cv.xxx.cc  admin.xxx.cc      │
-└────┬──────────────┬───────────┬──────────────┬──────────┘
-     │              │           │              │
-     ▼              ▼           ▼              ▼
- Frontend-Blog  Frontend-Home  Frontend-Cv  Frontend-Admin
- (Vue 3+Vite)  (Vue 3+Vite)  (Vue 3+Vite)  (Vue 3+Vite)
-     │              │           │              │
-     └──────────────┴───────────┴──────────────┘
+│       blog.xxx.cc       cv.xxx.cc       admin.xxx.cc    │
+└──────────┬────────────────┬────────────────┬──────────┘
+           │                │                │
+           ▼                ▼                ▼
+     Frontend-Blog     Frontend-Cv     Frontend-Admin
+     / 博客，/about 主页
+      (Vue 3+Vite)      (Vue 3+Vite)      (Vue 3+Vite)
+           │                │                │
+           └────────────────┴────────────────┘
                         │  /api
                         ▼
               ┌──────────────────┐
@@ -102,7 +104,7 @@
  Aliyun OSS (图片/文件存储)
 ```
 
-移动端管理 App（Expo/React Native）通过 HTTPS 调用后端 API（Nginx `api` 子域名反向代理），与四个 Web 子站共用同一套后端服务。
+移动端管理 App（Expo/React Native）通过 HTTPS 调用后端 API（Nginx `api` 子域名反向代理），与三个 Web 子站共用同一套后端服务。
 
 ### 后端技术栈
 
@@ -157,9 +159,8 @@ WuTao/
 │           ├── application-docker.yml         # Docker 环境配置
 │           ├── database/wutao.sql           # 数据库建表脚本
 │           └── mapper/                        # MyBatis XML
-├── Frontend-Blog/              # 博客前端
+├── Frontend-Blog/              # 博客前端，包含 /about 个人主页
 ├── Frontend-Admin/             # 管理后台前端
-├── Frontend-Home/              # 个人主页前端
 ├── Frontend-Cv/                # 在线简历前端
 └── App/                        # 移动端管理 App（Expo / React Native）
 ```
@@ -227,7 +228,7 @@ cp application-dev.yml.template application-dev.yml
 | `wutao.email.from` | application.yml | 发件人邮箱 |
 | `wutao.email.admin-notify-to` | application.yml | 接收新评论和留言通知的站长邮箱 |
 | `wutao.visitor.verify-code` | application.yml | 访客验证码 |
-| `wutao.website.*` | application.yml | 网站标题和 4 个子站地址 |
+| `wutao.website.*` | application.yml | 网站标题和 3 个子站地址 |
 | `wutao.jwt.ttl` | application-dev.yml | JWT 过期时间（毫秒） |
 | `wutao.datasource.*` | application-dev.yml | 数据库连接信息 |
 | `wutao.redis.*` | application-dev.yml | Redis 连接信息 |
@@ -244,7 +245,7 @@ java -jar WuTao-server/target/WuTao-server-1.0-SNAPSHOT.jar --spring.profiles.ac
 
 ### 5. 启动前端（开发模式）
 
-每个前端项目都可以独立启动：
+博客与个人主页只需启动 `Frontend-Blog`；管理端和简历仍独立启动：
 
 ```bash
 # 博客端
@@ -254,11 +255,6 @@ pnpm dev
 
 # 管理端
 cd Frontend-Admin
-pnpm install
-pnpm dev
-
-# 主页
-cd Frontend-Home
 pnpm install
 pnpm dev
 
@@ -276,14 +272,14 @@ pnpm dev
 |---|---|
 | 博客端 | http://localhost:5173 |
 | 管理端 | http://localhost:5174 |
-| 主页 | http://localhost:5175 |
+| 个人主页 | http://localhost:5173/about |
 | 简历 | http://localhost:5176 |
 
 > 首次使用需要在数据库管理员账号或访客账号（如果需要），然后在管理端配置个人信息等内容。
 
 ### 7. 移动端 App（可选）
 
-`App/` 是移动端管理后台，与四个 Web 子站共用后端接口，通过 EAS 云端打包成 APK 安装到手机，不需要本地 Android 环境：
+`App/` 是移动端管理后台，与三个 Web 子站共用后端接口，通过 EAS 云端打包成 APK 安装到手机，不需要本地 Android 环境：
 
 ```bash
 cd App
@@ -353,7 +349,7 @@ wutao:
 ### 前端打包
 
 ```bash
-# 以博客端为例（其余三个同理）
+# 以博客端为例（管理端和简历同理，主页包含在博客产物内）
 cd Frontend-Blog
 pnpm install
 pnpm build
@@ -394,8 +390,10 @@ server {
     }
 }
 
-# 其他子站（home / admin / cv）配置类似，修改 server_name 和 root 即可
+# 其他子站（admin / cv）配置类似，修改 server_name 和 root 即可
 ```
+
+个人主页使用博客站点的 `/about` 路径，旧 `/home` 自动跳转到 `/about`。已有的 `try_files` 回退规则支持直接访问和刷新，无需独立主页站点。旧主页域名应重定向到博客域名的 `/about`；使用 Docker 默认配置时已包含此重定向，修改域名时需同步修改跳转目标。
 
 ### 部署到子路径（可选）
 

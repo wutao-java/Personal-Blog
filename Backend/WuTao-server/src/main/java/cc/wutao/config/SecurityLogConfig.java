@@ -24,7 +24,7 @@ public class SecurityLogConfig {
 
     /** 项目自身的合法路径前缀，命中则跳过检测 */
     private static final Set<String> ALLOWED_PREFIXES = Set.of(
-            "/blog/", "/admin/", "/home/", "/cv/", "/health", "/ws"
+            "/blog/", "/admin/", "/cv/", "/health", "/ws"
     );
 
     /** 典型扫描路径中出现的后缀 */

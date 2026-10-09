@@ -3,10 +3,12 @@ import { ref, computed, onMounted, onBeforeUnmount, nextTick, watch } from 'vue'
 import { useRoute, useRouter, onBeforeRouteLeave } from 'vue-router'
 import { useArticleStore } from '@/stores'
 import { uploadFile } from '@/api/settings'
-import { getAiStatus } from '@/api/ai'
+import { getAiStatus, getAiCoverStatus, discardAiCover } from '@/api/ai'
+import { MagicStick, Delete } from '@element-plus/icons-vue'
 import { MdEditor } from 'md-editor-v3'
 import EmojiPicker from '@/components/EmojiPicker.vue'
 import AiCorrectionDialog from '@/components/AiCorrectionDialog.vue'
+import AiCoverDialog from '@/components/AiCoverDialog.vue'
 import 'md-editor-v3/lib/style.css'
 import { useMobile } from '@/composables/useMobile'
 
@@ -15,13 +17,23 @@ const router = useRouter()
 const articleStore = useArticleStore()
 const { isMobile } = useMobile()
 
-const isEdit = computed(() => !!route.params.id)
+const isEdit = computed(() => !!(route.params.id || form.value.id))
 
 // 后端是否启用了 AI 摘要模块（未打包或未启用时为 false，隐藏 AI 开关）
 const aiEnabled = ref(false)
 
 // AI 纠错弹窗可见性
 const showAiCorrection = ref(false)
+const showAiCover = ref(false)
+const aiCoverStatus = ref({ enabled: false, message: 'AI 生图状态查询中' })
+const selectedAiCover = ref(null)
+const savedCoverPreview = ref(null)
+const coverPreview = computed(() => {
+  const cover = selectedAiCover.value || savedCoverPreview.value
+  return cover?.imageUrl === form.value.coverImage
+    ? cover.previewUrl
+    : form.value.coverImage
+})
 
 const form = ref({
   id: null,
@@ -147,6 +159,27 @@ const handleCoverUpload = async (options) => {
   }
 }
 
+const applyAiCover = (candidate) => {
+  const previous = selectedAiCover.value
+  selectedAiCover.value = candidate
+  form.value.coverImage = candidate.imageUrl
+  if (previous && previous.id !== candidate.id) {
+    discardAiCover(previous.id).catch(() => {})
+  }
+  ElMessage.success('已采用封面')
+}
+
+watch(
+  () => form.value.coverImage,
+  (url) => {
+    const candidate = selectedAiCover.value
+    if (candidate && candidate.imageUrl !== url) {
+      selectedAiCover.value = null
+      discardAiCover(candidate.id).catch(() => {})
+    }
+  }
+)
+
 /* ---- 标题失焦自动生成 slug ---- */
 const autoSlug = () => {
   if (form.value.title && !form.value.slug) {
@@ -210,11 +243,18 @@ const handleSave = async (
   try {
     form.value.isPublished = isPublished
     // 勾选AI生成摘要时：本地保留用户手写摘要（取消勾选可恢复），但发布时不传递，交给后端异步生成
-    const payload = { ...form.value }
+    const payload = {
+      ...form.value,
+      aiCoverId: selectedAiCover.value?.id ?? null
+    }
     if (isPublished === 1 && form.value.aiGenerateSummary) {
       payload.summary = ''
     }
-    await articleStore.saveArticle(payload)
+    form.value.id = await articleStore.saveArticle(payload)
+    if (selectedAiCover.value) {
+      savedCoverPreview.value = selectedAiCover.value
+      selectedAiCover.value = null
+    }
     isSaved.value = isPublished === 1 && redirectAfterSave
     takeSnapshot()
     ElMessage.success(isPublished ? '发布成功' : '保存草稿成功')
@@ -223,6 +263,8 @@ const handleSave = async (
     }
     if (redirectAfterSave) {
       router.push('/article/list')
+    } else if (!route.params.id && form.value.id) {
+      router.replace(`/article/edit/${form.value.id}`)
     }
   } catch (error) {
     if (error?.response?.status === 401) {
@@ -302,6 +344,11 @@ onMounted(async () => {
   // 探测后端 AI 模块能力：未打包或未启用时自动隐藏"AI 生成摘要"开关
   const aiStatus = await getAiStatus()
   aiEnabled.value = aiStatus?.enabled === true
+  try {
+    aiCoverStatus.value = await getAiCoverStatus()
+  } catch {
+    aiCoverStatus.value = { enabled: false, message: 'AI 生图状态查询失败' }
+  }
 
   await Promise.all([articleStore.fetchCategories(), articleStore.fetchTags()])
   if (isEdit.value) {
@@ -318,6 +365,10 @@ onMounted(async () => {
         contentMarkdown: res.contentMarkdown || res.contentHtml || '',
         isPublished: res.isPublished ?? 0
       })
+      savedCoverPreview.value = {
+        imageUrl: res.coverImage,
+        previewUrl: res.coverPreviewUrl || res.coverImage
+      }
     }
   }
   takeSnapshot()
@@ -325,6 +376,9 @@ onMounted(async () => {
 
 onBeforeUnmount(() => {
   window.removeEventListener('keydown', onKeydownSave)
+  if (selectedAiCover.value) {
+    discardAiCover(selectedAiCover.value.id).catch(() => {})
+  }
 })
 </script>
 
@@ -468,17 +522,53 @@ onBeforeUnmount(() => {
         </div>
 
         <div class="aside-section">
-          <div class="aside-label">封面图</div>
+          <div class="cover-heading">
+            <div class="aside-label">封面图</div>
+            <div class="cover-tools">
+              <el-tooltip
+                :content="aiCoverStatus.message"
+                :disabled="aiCoverStatus.enabled"
+              >
+                <span>
+                  <el-button
+                    size="small"
+                    :icon="MagicStick"
+                    :disabled="
+                      !aiCoverStatus.enabled ||
+                      !form.title.trim() ||
+                      !form.contentMarkdown.trim() ||
+                      saving ||
+                      uploadingCover
+                    "
+                    @click="showAiCover = true"
+                  >
+                    AI 生成
+                  </el-button>
+                </span>
+              </el-tooltip>
+              <el-tooltip content="移除封面">
+                <el-button
+                  v-if="form.coverImage"
+                  size="small"
+                  :icon="Delete"
+                  aria-label="移除封面"
+                  :disabled="saving || uploadingCover"
+                  @click="form.coverImage = ''"
+                />
+              </el-tooltip>
+            </div>
+          </div>
           <el-upload
             :show-file-list="false"
             :http-request="handleCoverUpload"
             accept="image/*"
             class="cover-uploader"
+            :disabled="saving || uploadingCover"
             drag
           >
             <img
               v-if="form.coverImage"
-              :src="form.coverImage"
+              :src="coverPreview"
               class="cover-preview"
             />
             <div v-else class="cover-placeholder">
@@ -488,6 +578,7 @@ onBeforeUnmount(() => {
           </el-upload>
           <el-input
             v-model="form.coverImage"
+            :disabled="saving || uploadingCover"
             placeholder="或直接输入图片 URL"
             clearable
             size="small"
@@ -502,6 +593,12 @@ onBeforeUnmount(() => {
       v-model="showAiCorrection"
       :content="form.contentMarkdown"
       @applied="applyAiCorrection"
+    />
+    <AiCoverDialog
+      v-model="showAiCover"
+      :title="form.title"
+      :content="form.contentMarkdown"
+      @adopted="applyAiCover"
     />
   </div>
 </template>
@@ -659,6 +756,25 @@ onBeforeUnmount(() => {
 }
 
 /* 封面上传 */
+.cover-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+.cover-heading .aside-label {
+  margin-bottom: 0;
+}
+.cover-tools {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.cover-tools :deep(.el-button + .el-button) {
+  margin-left: 0;
+}
 .cover-uploader {
   width: 100%;
 }

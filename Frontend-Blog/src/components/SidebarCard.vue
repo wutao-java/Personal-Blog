@@ -1,14 +1,23 @@
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { useBlogStore } from '@/stores'
 
 const router = useRouter()
+const route = useRoute()
 const blogStore = useBlogStore()
 
 /* 分类/标签弹窗 */
 const showCatModal = ref(false)
 const showTagModal = ref(false)
+
+watch(
+  () => route.fullPath,
+  () => {
+    showCatModal.value = false
+    showTagModal.value = false
+  }
+)
 
 /* WebSocket 在线访客 */
 const onlineCount = ref(0)
@@ -87,195 +96,214 @@ const goTag = (slug) => {
 </script>
 
 <template>
-  <aside class="sidebar">
-    <!-- 个人信息卡片 -->
-    <div class="side-card info-card">
-      <template v-if="blogStore.loaded">
-        <div class="info-avatar-wrap">
-          <img
-            v-if="info.avatar"
-            :src="info.avatar"
-            class="info-avatar"
-            loading="lazy"
-          />
-        </div>
-        <h3 class="info-name">{{ info.nickname || 'wutao' }}</h3>
-        <p v-if="info.tag" class="info-tag">{{ info.tag }}</p>
-        <p v-if="info.description" class="info-description">
-          {{ info.description }}
-        </p>
-        <p v-if="info.location" class="info-location">
-          <i class="iconfont icon-position" />
-          {{ info.location }}
-        </p>
+  <div class="sidebar-column">
+    <aside class="sidebar">
+      <!-- 个人信息卡片 -->
+      <div class="side-card info-card">
+        <template v-if="blogStore.loaded">
+          <div class="info-avatar-wrap">
+            <img
+              v-if="info.avatar"
+              :src="info.avatar"
+              class="info-avatar"
+              :alt="info.nickname || '头像'"
+              loading="lazy"
+            />
+          </div>
+          <h3 class="info-name">{{ info.nickname || 'wutao' }}</h3>
+          <p v-if="info.tag" class="info-tag">{{ info.tag }}</p>
+          <p v-if="info.description" class="info-description">
+            {{ info.description }}
+          </p>
+          <p v-if="info.location" class="info-location">
+            <i class="iconfont icon-position" />
+            {{ info.location }}
+          </p>
 
-        <div class="info-stats">
-          <div class="info-stat" @click="goArchive">
-            <span class="stat-num">{{ report.articleTotalCount ?? 0 }}</span>
-            <span class="stat-label">文章</span>
+          <div class="info-stats">
+            <button class="info-stat" @click="goArchive">
+              <span class="stat-num">{{ report.articleTotalCount ?? 0 }}</span>
+              <span class="stat-label">文章</span>
+            </button>
+            <button class="info-stat" @click="showCatModal = true">
+              <span class="stat-num">{{ report.categoryTotalCount ?? 0 }}</span>
+              <span class="stat-label">分类</span>
+            </button>
+            <button class="info-stat" @click="showTagModal = true">
+              <span class="stat-num">{{ report.tagTotalCount ?? 0 }}</span>
+              <span class="stat-label">标签</span>
+            </button>
           </div>
-          <div class="info-stat" @click="showCatModal = true">
-            <span class="stat-num">{{ report.categoryTotalCount ?? 0 }}</span>
-            <span class="stat-label">分类</span>
-          </div>
-          <div class="info-stat" @click="showTagModal = true">
-            <span class="stat-num">{{ report.tagTotalCount ?? 0 }}</span>
-            <span class="stat-label">标签</span>
-          </div>
-        </div>
 
-        <div class="info-social">
-          <a
-            v-if="info.github"
-            :href="info.github"
-            target="_blank"
-            rel="noopener"
-            class="social-link"
-            title="GitHub"
-          >
-            <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
-              <path
-                d="M12 .3a12 12 0 00-3.8 23.38c.6.12.83-.26.83-.57L9 21.07c-3.34.72-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.08-.74.08-.73.08-.73 1.2.08 1.84 1.24 1.84 1.24 1.07 1.83 2.81 1.3 3.5 1 .1-.78.42-1.3.76-1.6-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.13-.3-.54-1.52.12-3.18 0 0 1-.33 3.3 1.23a11.5 11.5 0 016.02 0c2.28-1.56 3.29-1.23 3.29-1.23.66 1.66.25 2.88.12 3.18a4.65 4.65 0 011.23 3.22c0 4.61-2.81 5.63-5.48 5.93.43.37.81 1.1.81 2.22l-.01 3.29c0 .31.22.69.83.57A12 12 0 0012 .3"
-              />
-            </svg>
-          </a>
-          <a
-            v-if="info.email"
-            :href="`mailto:${info.email}`"
-            class="social-link"
-            title="Email"
-          >
-            <svg
-              viewBox="0 0 24 24"
-              width="18"
-              height="18"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
+          <div class="info-social">
+            <a
+              v-if="info.github"
+              :href="info.github"
+              target="_blank"
+              rel="noopener"
+              class="social-link"
+              title="GitHub"
             >
-              <rect width="20" height="16" x="2" y="4" rx="2" />
-              <path d="m22 7-8.97 5.7a1.94 1.94 0 01-2.06 0L2 7" />
-            </svg>
-          </a>
-        </div>
-      </template>
-      <template v-else>
-        <div class="info-avatar-wrap">
-          <div class="sk-avatar" />
-        </div>
-        <div class="sk-line sk-line-name" />
-        <div class="sk-line sk-line-tag" />
-        <div class="sk-line sk-line-loc" />
-        <div class="info-stats">
-          <div class="info-stat" v-for="i in 3" :key="i">
-            <span class="sk-line sk-stat-num" />
-            <span class="sk-line sk-stat-label" />
+              <svg
+                viewBox="0 0 24 24"
+                width="18"
+                height="18"
+                fill="currentColor"
+              >
+                <path
+                  d="M12 .3a12 12 0 00-3.8 23.38c.6.12.83-.26.83-.57L9 21.07c-3.34.72-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.08-.74.08-.73.08-.73 1.2.08 1.84 1.24 1.84 1.24 1.07 1.83 2.81 1.3 3.5 1 .1-.78.42-1.3.76-1.6-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.13-.3-.54-1.52.12-3.18 0 0 1-.33 3.3 1.23a11.5 11.5 0 016.02 0c2.28-1.56 3.29-1.23 3.29-1.23.66 1.66.25 2.88.12 3.18a4.65 4.65 0 011.23 3.22c0 4.61-2.81 5.63-5.48 5.93.43.37.81 1.1.81 2.22l-.01 3.29c0 .31.22.69.83.57A12 12 0 0012 .3"
+                />
+              </svg>
+            </a>
+            <a
+              v-if="info.email"
+              :href="`mailto:${info.email}`"
+              class="social-link"
+              title="Email"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                width="18"
+                height="18"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <rect width="20" height="16" x="2" y="4" rx="2" />
+                <path d="m22 7-8.97 5.7a1.94 1.94 0 01-2.06 0L2 7" />
+              </svg>
+            </a>
           </div>
-        </div>
-        <div class="info-social">
-          <span class="sk-social-icon" v-for="i in 2" :key="i" />
-        </div>
-      </template>
-    </div>
-
-    <!-- 站点统计卡片 -->
-    <div class="side-card stats-card">
-      <template v-if="blogStore.loaded">
-        <h4 class="card-title"><i class="iconfont icon-eye" /> 站点统计</h4>
-        <div class="stats-grid">
-          <div class="sg-item">
-            <span class="sg-label">在线访客</span>
-            <span class="sg-val">{{ onlineCount }}</span>
+        </template>
+        <template v-else>
+          <div class="info-avatar-wrap">
+            <div class="sk-avatar" />
           </div>
-          <div class="sg-item">
-            <span class="sg-label">今日浏览</span>
-            <span class="sg-val">{{ report.viewTodayCount ?? 0 }}</span>
+          <div class="sk-line sk-line-name" />
+          <div class="sk-line sk-line-tag" />
+          <div class="sk-line sk-line-loc" />
+          <div class="info-stats">
+            <div class="info-stat" v-for="i in 3" :key="i">
+              <span class="sk-line sk-stat-num" />
+              <span class="sk-line sk-stat-label" />
+            </div>
           </div>
-          <div class="sg-item">
-            <span class="sg-label">总浏览量</span>
-            <span class="sg-val">{{ report.viewTotalCount ?? 0 }}</span>
+          <div class="info-social">
+            <span class="sk-social-icon" v-for="i in 2" :key="i" />
           </div>
-          <div class="sg-item">
-            <span class="sg-label">总访客量</span>
-            <span class="sg-val">{{ report.visitorTotalCount ?? 0 }}</span>
-          </div>
-        </div>
-      </template>
-      <template v-else>
-        <div class="sk-line sk-card-title" />
-        <div class="stats-grid">
-          <div class="sg-item" v-for="i in 4" :key="i">
-            <span class="sk-line sk-sg-label" />
-            <span class="sk-line sk-sg-val" />
-          </div>
-        </div>
-      </template>
-    </div>
-
-    <!-- 默认插槽（文章页可插入目录等） -->
-    <slot />
-
-    <!-- ===== 分类弹窗 ===== -->
-    <el-dialog
-      v-model="showCatModal"
-      title="所有分类"
-      width="420px"
-      :append-to-body="true"
-    >
-      <div class="modal-list">
-        <div
-          v-for="cat in blogStore.categories"
-          :key="cat.id"
-          class="modal-item"
-          @click="goCategory(cat.slug)"
-        >
-          <i class="iconfont icon-folder" />
-          <span class="modal-name">{{ cat.name }}</span>
-          <span class="modal-count">{{ cat.articleCount ?? 0 }} 篇</span>
-        </div>
-        <div v-if="!blogStore.categories.length" class="modal-empty">
-          暂无分类
-        </div>
+        </template>
       </div>
-    </el-dialog>
 
-    <!-- ===== 标签弹窗 ===== -->
-    <el-dialog
-      v-model="showTagModal"
-      title="所有标签"
-      width="420px"
-      :append-to-body="true"
-    >
-      <div class="modal-tag-cloud">
-        <span
-          v-for="tag in blogStore.tags"
-          :key="tag.id"
-          class="modal-tag"
-          @click="goTag(tag.slug)"
-        >
-          <i class="iconfont icon-biaoqian" /> {{ tag.name }}
-          <span class="tag-count">{{ tag.articleCount ?? 0 }}</span>
-        </span>
-        <div v-if="!blogStore.tags.length" class="modal-empty">暂无标签</div>
+      <!-- 站点统计卡片 -->
+      <div class="side-card stats-card">
+        <template v-if="blogStore.loaded">
+          <h4 class="card-title"><i class="iconfont icon-eye" /> 站点统计</h4>
+          <div class="stats-grid">
+            <div class="sg-item">
+              <span class="sg-label">在线访客</span>
+              <span class="sg-val">{{ onlineCount }}</span>
+            </div>
+            <div class="sg-item">
+              <span class="sg-label">今日浏览</span>
+              <span class="sg-val">{{ report.viewTodayCount ?? 0 }}</span>
+            </div>
+            <div class="sg-item">
+              <span class="sg-label">总浏览量</span>
+              <span class="sg-val">{{ report.viewTotalCount ?? 0 }}</span>
+            </div>
+            <div class="sg-item">
+              <span class="sg-label">总访客量</span>
+              <span class="sg-val">{{ report.visitorTotalCount ?? 0 }}</span>
+            </div>
+          </div>
+        </template>
+        <template v-else>
+          <div class="sk-line sk-card-title" />
+          <div class="stats-grid">
+            <div class="sg-item" v-for="i in 4" :key="i">
+              <span class="sk-line sk-sg-label" />
+              <span class="sk-line sk-sg-val" />
+            </div>
+          </div>
+        </template>
       </div>
-    </el-dialog>
-  </aside>
+
+      <!-- 默认插槽（文章页可插入目录等） -->
+      <slot />
+
+      <!-- ===== 分类弹窗 ===== -->
+      <el-dialog
+        v-model="showCatModal"
+        title="所有分类"
+        width="420px"
+        class="blog-glass-dialog"
+        :append-to-body="true"
+      >
+        <div class="modal-list">
+          <button
+            v-for="cat in blogStore.categories"
+            :key="cat.id"
+            class="modal-item"
+            @click="goCategory(cat.slug)"
+          >
+            <i class="iconfont icon-folder" />
+            <span class="modal-name">{{ cat.name }}</span>
+            <span class="modal-count">{{ cat.articleCount ?? 0 }} 篇</span>
+          </button>
+          <div v-if="!blogStore.categories.length" class="modal-empty">
+            暂无分类
+          </div>
+        </div>
+      </el-dialog>
+
+      <!-- ===== 标签弹窗 ===== -->
+      <el-dialog
+        v-model="showTagModal"
+        title="所有标签"
+        width="420px"
+        class="blog-glass-dialog"
+        :append-to-body="true"
+      >
+        <div class="modal-tag-cloud">
+          <button
+            v-for="tag in blogStore.tags"
+            :key="tag.id"
+            class="modal-tag"
+            @click="goTag(tag.slug)"
+          >
+            <i class="iconfont icon-biaoqian" /> {{ tag.name }}
+            <span class="tag-count">{{ tag.articleCount ?? 0 }}</span>
+          </button>
+          <div v-if="!blogStore.tags.length" class="modal-empty">暂无标签</div>
+        </div>
+      </el-dialog>
+    </aside>
+  </div>
 </template>
 
 <style scoped>
-.sidebar {
-  width: 280px;
+.sidebar-column {
+  width: 286px;
   flex-shrink: 0;
-  position: sticky;
-  top: 74px;
+}
+.sidebar {
+  width: inherit;
+  position: fixed;
+  top: 50%;
+  transform: translateY(-50%);
+  max-height: calc(100dvh - 224px);
+  overflow-y: auto;
 }
 .side-card {
   background: var(--blog-card);
-  border-radius: 8px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
-  border: 1px solid var(--blog-border-light);
-  padding: 20px;
-  margin-bottom: 16px;
+  border-radius: 26px;
+  box-shadow: var(--blog-shadow);
+  border: 1px solid transparent;
+  padding: 28px 25px 24px;
+  margin-bottom: 20px;
+}
+.side-card:last-of-type {
+  margin-bottom: 0;
 }
 
 /* 个人信息卡片 */
@@ -283,32 +311,34 @@ const goTag = (slug) => {
   text-align: center;
 }
 .info-avatar-wrap {
-  margin-bottom: 12px;
+  margin-bottom: 20px;
 }
 .info-avatar {
-  width: 90px;
-  height: 90px;
+  width: 68px;
+  height: 68px;
   border-radius: 50%;
   object-fit: cover;
-  border: 3px solid #ebeef5;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  border: 3px solid var(--blog-bg);
 }
 .info-name {
-  font-size: 17px;
+  font-size: 24px;
   font-weight: 700;
-  margin: 0 0 4px;
-  color: #303133;
+  margin: 0 0 9px;
+  color: var(--blog-text);
+  overflow-wrap: anywhere;
 }
 .info-tag {
   font-size: 12px;
-  color: #909399;
-  margin: 0 0 6px;
+  color: var(--blog-text2);
+  margin: 0 0 18px;
+  overflow-wrap: anywhere;
 }
 .info-description {
-  font-size: 11px;
-  line-height: 1.6;
-  color: #909399;
-  margin: 0 0 6px;
+  font-size: 14px;
+  line-height: 2;
+  color: var(--blog-text2);
+  margin: 0 0 20px;
+  overflow-wrap: anywhere;
 }
 .info-location {
   display: flex;
@@ -316,8 +346,8 @@ const goTag = (slug) => {
   justify-content: center;
   gap: 3px;
   font-size: 12px;
-  color: #b0b0b0;
-  margin: 0 0 14px;
+  color: var(--blog-text2);
+  margin: 0 0 20px;
 }
 .info-location .iconfont {
   font-size: 13px;
@@ -328,7 +358,8 @@ const goTag = (slug) => {
   justify-content: center;
   gap: 0;
   padding: 12px 0;
-  margin: 0 -20px;
+  margin: 0;
+  border-top: 1px solid var(--blog-border);
 }
 .info-stat {
   flex: 1;
@@ -336,26 +367,29 @@ const goTag = (slug) => {
   cursor: pointer;
   transition: background 0.15s;
   padding: 4px 0;
-  border-radius: 4px;
+  border-radius: 10px;
+  border: 0;
+  background: none;
+  font: inherit;
 }
 .info-stat:hover {
-  background: #f5f7fa;
+  background: var(--blog-hover);
 }
 .info-stat + .info-stat {
-  border-left: 1px solid #ebeef5;
+  border-left: 1px solid var(--blog-border);
 }
 .stat-num {
   display: block;
   font-size: 18px;
   font-weight: 700;
-  color: #303133;
+  color: var(--blog-text);
   font-family: var(--blog-serif);
 }
 .stat-label {
   font-size: 11px;
   color: #909399;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0;
 }
 
 .info-social {
@@ -372,23 +406,27 @@ const goTag = (slug) => {
   height: 36px;
   border-radius: 50%;
   border: none;
-  color: #606266;
+  color: var(--blog-text2);
   cursor: pointer;
-  background: none;
+  background: var(--blog-bg);
   transition:
     color 0.15s,
     background 0.15s;
 }
 .social-link:hover {
-  color: #303133;
-  background: #f5f7fa;
+  color: var(--blog-accent);
+  background: var(--blog-accent-soft);
+}
+.stats-card {
+  background: var(--blog-accent-soft);
+  border-color: var(--blog-border);
 }
 /* 站点统计 */
 .card-title {
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 700;
   margin: 0 0 12px;
-  color: #303133;
+  color: var(--blog-text);
   display: flex;
   align-items: center;
   gap: 6px;
@@ -399,14 +437,14 @@ const goTag = (slug) => {
 .stats-grid {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 13px;
 }
 .sg-item {
   display: flex;
   align-items: center;
   justify-content: space-between;
   font-size: 13px;
-  color: #606266;
+  color: var(--blog-text2);
 }
 .sg-icon {
   margin-right: 4px;
@@ -417,7 +455,7 @@ const goTag = (slug) => {
 }
 .sg-val {
   font-weight: 600;
-  color: #303133;
+  color: var(--blog-text);
   font-family: var(--blog-serif);
 }
 
@@ -435,7 +473,12 @@ const goTag = (slug) => {
   border-radius: 6px;
   transition: background 0.12s;
   font-size: 14px;
-  color: #303133;
+  color: var(--blog-text);
+  width: 100%;
+  border: 0;
+  background: none;
+  text-align: left;
+  font-family: inherit;
 }
 .modal-item:hover {
   background: #f5f7fa;
@@ -477,6 +520,8 @@ const goTag = (slug) => {
   color: #606266;
   cursor: pointer;
   transition: all 0.15s;
+  background: none;
+  font-family: inherit;
 }
 .modal-tag:hover {
   color: #303133;
@@ -570,9 +615,27 @@ const goTag = (slug) => {
 }
 
 @media (max-width: 960px) {
+  .sidebar-column {
+    width: 100%;
+  }
   .sidebar {
     width: 100%;
     position: static;
+    transform: none;
+    max-height: none;
+    overflow: visible;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+  }
+  .side-card {
+    margin-bottom: 0;
+  }
+}
+@media (max-width: 600px) {
+  .sidebar {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 17px;
   }
 }
 </style>

@@ -17,6 +17,11 @@
     </properties>
 
     <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
         <!-- 契约层：主程序与扩展模块共同依赖的接口 -->
         <dependency>
             <groupId>cc.wutao</groupId>

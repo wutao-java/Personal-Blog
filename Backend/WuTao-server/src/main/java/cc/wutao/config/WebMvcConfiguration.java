@@ -45,7 +45,7 @@ public class WebMvcConfiguration extends WebMvcConfigurationSupport {
                 response.setHeader("Pragma", "no-cache");
                 return true;
             }
-        }).addPathPatterns("/admin/**", "/blog/**","/cv/**","/home/**");
+        }).addPathPatterns("/admin/**", "/blog/**","/cv/**");
     }
 
     /**

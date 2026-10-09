@@ -50,7 +50,6 @@ public class OssUrlResponseAdvice implements ResponseBodyAdvice<Object> {
     private boolean isPublicApi(ServerHttpRequest request) {
         String path = request.getURI().getPath();
         return path.startsWith("/blog/")
-                || path.startsWith("/home/")
                 || path.startsWith("/cv/");
     }
 

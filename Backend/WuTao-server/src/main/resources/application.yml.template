@@ -95,7 +95,6 @@ wutao:
       max-dimension: 2560       # 图片最长边像素上限，超过则等比缩小，防止大图解码占用巨量内存
   website:
     title:       # 网站标题(或你的昵称)
-    home:        # 首页地址
     admin:       # 后台管理地址
     cv:          # 个人简历地址
     blog:        # 博客地址
@@ -112,3 +111,12 @@ wutao:
     model-name: deepseek-v4-flash           # 模型名称
     temperature: 0.3                        # 采样温度
     timeout-seconds: 180                     # 请求超时时间(秒)
+    # 生图配置独立于摘要；平台待定，不提供默认接口或模型
+    image:
+      enabled: ${AI_IMAGE_ENABLED:false}
+      endpoint: ${AI_IMAGE_ENDPOINT:}        # 完整的 images/generations 接口地址
+      api-key: ${AI_IMAGE_API_KEY:}
+      model-name: ${AI_IMAGE_MODEL_NAME:}
+      size: ${AI_IMAGE_SIZE:1536x1024}
+      response-format: ${AI_IMAGE_RESPONSE_FORMAT:}  # 需要时设 b64_json
+      timeout-seconds: ${AI_IMAGE_TIMEOUT_SECONDS:180}

@@ -42,6 +42,9 @@ public interface ArticleMapper {
     @Select("select * from articles where id = #{id}")
     Articles getById(Long id);
 
+    @Select("select * from articles where id = #{id} for update")
+    Articles getByIdForUpdate(Long id);
+
     /**
      * 更新文章
      * @param articles

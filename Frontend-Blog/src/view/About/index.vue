@@ -1,7 +1,6 @@
 <script setup>
 import { inject, onMounted, computed } from 'vue'
 import { useBlogStore } from '@/stores'
-import SidebarCard from '@/components/SidebarCard.vue'
 
 const blogStore = useBlogStore()
 const { articleTitle, articleMeta } = inject('setHero')
@@ -9,7 +8,7 @@ const { articleTitle, articleMeta } = inject('setHero')
 const info = computed(() => blogStore.personalInfo)
 
 onMounted(() => {
-  articleTitle.value = '关于'
+  articleTitle.value = '主页'
   articleMeta.value = '关于我和这个博客'
 })
 </script>
@@ -148,9 +147,9 @@ onMounted(() => {
             </h3>
             <div class="section-body">
               <p>
-                本网站含有<strong>主页 Home</strong>、<strong>博客 Blog</strong
-                >、<strong>简历 CV</strong>、<strong>管理 Admin</strong>
-                四个端，采用黑白简约风格。
+                本网站含有<strong>博客 Blog</strong>、<strong>简历 CV</strong
+                >、<strong>管理 Admin</strong>
+                三个端，个人主页包含在博客内。
               </p>
               <div class="tech-stack">
                 <h4 class="tech-label">前端 Vue3</h4>
@@ -192,8 +191,6 @@ onMounted(() => {
           </section>
         </div>
       </div>
-
-      <SidebarCard />
     </div>
   </div>
 </template>

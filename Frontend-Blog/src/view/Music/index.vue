@@ -1,7 +1,6 @@
 <script setup>
 import { computed, nextTick, ref } from 'vue'
 import { useBlogStore } from '@/stores'
-import SidebarCard from '@/components/SidebarCard.vue'
 
 const blogStore = useBlogStore()
 const audioRef = ref(null)
@@ -161,82 +160,80 @@ const setVolume = (event) => {
             <p>公开歌曲后，它们会出现在这里。</p>
           </div>
         </div>
-      </section>
 
-      <SidebarCard />
-    </div>
+        <div
+          v-if="currentTrack"
+          class="player-dock"
+          role="region"
+          aria-label="音乐播放器"
+        >
+          <div class="dock-track">
+            <span class="dock-cover">
+              <img
+                v-if="currentTrack.coverImage"
+                :src="currentTrack.coverImage"
+                :alt="currentTrack.title"
+                :style="{ filter: currentTrack.coverFilter }"
+              />
+              <i v-else class="iconfont icon-yinle" />
+            </span>
+            <span class="dock-info">
+              <strong>{{ currentTrack.title }}</strong>
+              <small>{{ currentTrack.artist || '未知音乐人' }}</small>
+            </span>
+          </div>
 
-    <div
-      v-if="currentTrack"
-      class="player-dock"
-      role="region"
-      aria-label="音乐播放器"
-    >
-      <div class="dock-track">
-        <span class="dock-cover">
-          <img
-            v-if="currentTrack.coverImage"
-            :src="currentTrack.coverImage"
-            :alt="currentTrack.title"
-            :style="{ filter: currentTrack.coverFilter }"
-          />
-          <i v-else class="iconfont icon-yinle" />
-        </span>
-        <span class="dock-info">
-          <strong>{{ currentTrack.title }}</strong>
-          <small>{{ currentTrack.artist || '未知音乐人' }}</small>
-        </span>
-      </div>
+          <div class="dock-center">
+            <div class="dock-controls">
+              <button type="button" title="上一首" @click="playPrevious">
+                <i class="iconfont icon-next previous-icon" />
+              </button>
+              <button
+                type="button"
+                class="main-control"
+                :title="isPlaying ? '暂停' : '播放'"
+                @click="togglePlayback"
+              >
+                <i
+                  class="iconfont"
+                  :class="isPlaying ? 'icon-zanting' : 'icon-play-full'"
+                />
+              </button>
+              <button type="button" title="下一首" @click="playNext">
+                <i class="iconfont icon-next" />
+              </button>
+            </div>
+            <div class="progress-row">
+              <span>{{ formatTime(currentTime) }}</span>
+              <input
+                type="range"
+                min="0"
+                max="100"
+                step="0.1"
+                :value="progress"
+                :style="{ '--range-progress': `${progress}%` }"
+                aria-label="播放进度"
+                @input="seek"
+              />
+              <span>{{ formatTime(duration) }}</span>
+            </div>
+          </div>
 
-      <div class="dock-center">
-        <div class="dock-controls">
-          <button type="button" title="上一首" @click="playPrevious">
-            <i class="iconfont icon-next previous-icon" />
-          </button>
-          <button
-            type="button"
-            class="main-control"
-            :title="isPlaying ? '暂停' : '播放'"
-            @click="togglePlayback"
-          >
-            <i
-              class="iconfont"
-              :class="isPlaying ? 'icon-zanting' : 'icon-play-full'"
+          <label class="volume-control" title="音量">
+            <i class="iconfont icon-yinle" aria-hidden="true" />
+            <input
+              type="range"
+              min="0"
+              max="1"
+              step="0.05"
+              :value="volume"
+              :style="{ '--range-progress': `${volume * 100}%` }"
+              aria-label="音量"
+              @input="setVolume"
             />
-          </button>
-          <button type="button" title="下一首" @click="playNext">
-            <i class="iconfont icon-next" />
-          </button>
+          </label>
         </div>
-        <div class="progress-row">
-          <span>{{ formatTime(currentTime) }}</span>
-          <input
-            type="range"
-            min="0"
-            max="100"
-            step="0.1"
-            :value="progress"
-            :style="{ '--range-progress': `${progress}%` }"
-            aria-label="播放进度"
-            @input="seek"
-          />
-          <span>{{ formatTime(duration) }}</span>
-        </div>
-      </div>
-
-      <label class="volume-control" title="音量">
-        <i class="iconfont icon-yinle" aria-hidden="true" />
-        <input
-          type="range"
-          min="0"
-          max="1"
-          step="0.05"
-          :value="volume"
-          :style="{ '--range-progress': `${volume * 100}%` }"
-          aria-label="音量"
-          @input="setVolume"
-        />
-      </label>
+      </section>
     </div>
 
     <audio
@@ -254,26 +251,17 @@ const setVolume = (event) => {
 
 <style scoped>
 .music-page {
-  --music-accent: #1fbd75;
-  --music-accent-hover: #18aa68;
-  --music-ink: #252a27;
-  --music-muted: #68706b;
-  --music-line: #e6e9e7;
-  --music-row: #f3f5f4;
-  --music-row-hover: #e9eeeb;
+  --music-accent: var(--blog-accent);
+  --music-accent-hover: var(--el-color-primary-dark-2);
+  --music-ink: var(--blog-text);
+  --music-muted: var(--blog-text2);
+  --music-line: var(--blog-border);
+  --music-row-hover: var(--blog-hover);
   min-height: 0;
-  padding: 0 0 90px;
+  padding: 0;
   overflow-x: hidden;
   background: transparent;
   color: var(--music-ink);
-  color-scheme: light;
-}
-
-:global(html.dark) .music-page {
-  --music-ink: #252a27;
-  --music-muted: #68706b;
-  --music-line: #e6e9e7;
-  background: transparent;
 }
 
 .music-content {
@@ -285,7 +273,13 @@ const setVolume = (event) => {
 .playlist {
   min-width: 0;
   flex: 1;
-  padding: 0;
+  min-height: 80dvh;
+  padding: 16px 14px;
+  display: flex;
+  flex-direction: column;
+  border-radius: var(--blog-radius);
+  background: var(--blog-card);
+  box-shadow: var(--blog-shadow);
 }
 
 .playlist-inner {
@@ -307,9 +301,9 @@ const setVolume = (event) => {
 .playlist-columns,
 .track-row {
   display: grid;
-  grid-template-columns: minmax(320px, 1.45fr) minmax(180px, 0.65fr) 72px;
+  grid-template-columns: minmax(0, 1.45fr) minmax(100px, 0.65fr) 72px;
   align-items: center;
-  column-gap: clamp(24px, 5vw, 88px);
+  column-gap: 24px;
 }
 
 .playlist-columns {
@@ -325,7 +319,7 @@ const setVolume = (event) => {
 
 .track-list {
   display: grid;
-  gap: 2px;
+  gap: 0;
 }
 
 .track-row {
@@ -333,8 +327,8 @@ const setVolume = (event) => {
   min-height: 62px;
   padding: 8px 14px;
   border: 0;
-  border-radius: 4px;
-  background: #fff;
+  border-radius: 0;
+  background: transparent;
   color: var(--music-ink);
   font: inherit;
   text-align: left;
@@ -344,8 +338,8 @@ const setVolume = (event) => {
     box-shadow 0.18s ease;
 }
 
-.track-row:nth-child(odd) {
-  background: var(--music-row);
+.track-row + .track-row {
+  border-top: 1px solid var(--music-line);
 }
 
 .track-row:hover {
@@ -353,7 +347,6 @@ const setVolume = (event) => {
 }
 
 .track-row.active {
-  background: #e9f7ef;
   box-shadow: inset 3px 0 0 var(--music-accent);
 }
 
@@ -372,7 +365,7 @@ const setVolume = (event) => {
   flex-shrink: 0;
   overflow: hidden;
   border-radius: 4px;
-  background: #e4e8e6;
+  background: var(--blog-hover);
   color: var(--music-muted);
 }
 
@@ -432,7 +425,7 @@ const setVolume = (event) => {
 }
 
 .track-row.active .track-title {
-  color: #0e7446;
+  color: var(--music-accent);
 }
 
 .track-artist,
@@ -474,28 +467,24 @@ const setVolume = (event) => {
 }
 
 .player-dock {
-  position: fixed;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  z-index: 90;
+  width: 100%;
   min-height: 90px;
-  padding: 8px clamp(18px, 2.25vw, 42px);
+  margin-top: auto;
+  padding: 8px;
   display: grid;
-  grid-template-columns: minmax(220px, 1fr) minmax(360px, 2fr) minmax(
-      180px,
-      1fr
-    );
+  grid-template-columns: minmax(0, 1fr) minmax(220px, 1.7fr) minmax(0, 1fr);
+  grid-template-rows: 52px 16px;
+  grid-template-areas:
+    'track controls volume'
+    '. progress .';
   align-items: center;
-  gap: clamp(18px, 3vw, 56px);
+  column-gap: 12px;
+  row-gap: 6px;
   border-top: 1px solid var(--music-line);
-  background: rgba(252, 253, 252, 0.96);
-  box-shadow: 0 -8px 26px rgba(31, 44, 36, 0.06);
-  backdrop-filter: blur(16px) saturate(1.15);
-  -webkit-backdrop-filter: blur(16px) saturate(1.15);
 }
 
 .dock-track {
+  grid-area: track;
   min-width: 0;
   display: flex;
   align-items: center;
@@ -505,7 +494,7 @@ const setVolume = (event) => {
 .dock-cover {
   width: 52px;
   height: 52px;
-  background: #e5e9e7;
+  background: var(--blog-hover);
   color: var(--music-accent);
 }
 
@@ -525,10 +514,11 @@ const setVolume = (event) => {
 }
 
 .dock-center {
-  min-width: 0;
+  display: contents;
 }
 
 .dock-controls {
+  grid-area: controls;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -544,7 +534,7 @@ const setVolume = (event) => {
   border: 0;
   border-radius: 50%;
   background: transparent;
-  color: #323834;
+  color: var(--music-ink);
   cursor: pointer;
   transition:
     color 0.18s ease,
@@ -553,20 +543,20 @@ const setVolume = (event) => {
 }
 
 .dock-controls button:hover {
-  background: #edf0ee;
-  color: #111512;
+  background: var(--blog-hover);
+  color: var(--music-accent);
 }
 
 .dock-controls .main-control {
   width: 40px;
   height: 40px;
   background: var(--music-accent);
-  color: #0d2618;
+  color: var(--blog-accent-contrast);
 }
 
 .dock-controls .main-control:hover {
   background: var(--music-accent-hover);
-  color: #07170e;
+  color: var(--blog-accent-contrast);
 }
 
 .previous-icon {
@@ -574,6 +564,8 @@ const setVolume = (event) => {
 }
 
 .progress-row {
+  grid-area: progress;
+  min-width: 0;
   display: grid;
   grid-template-columns: 42px minmax(120px, 1fr) 42px;
   align-items: center;
@@ -602,7 +594,7 @@ const setVolume = (event) => {
   background: linear-gradient(
     to right,
     var(--music-accent) 0 var(--range-progress),
-    #dfe3e1 var(--range-progress) 100%
+    var(--music-line) var(--range-progress) 100%
   );
 }
 
@@ -613,13 +605,13 @@ const setVolume = (event) => {
   appearance: none;
   border: 0;
   border-radius: 50%;
-  background: #202622;
+  background: var(--music-accent);
 }
 
 .music-page input[type='range']::-moz-range-track {
   height: 3px;
   border-radius: 2px;
-  background: #dfe3e1;
+  background: var(--music-line);
 }
 
 .music-page input[type='range']::-moz-range-progress {
@@ -633,10 +625,11 @@ const setVolume = (event) => {
   height: 10px;
   border: 0;
   border-radius: 50%;
-  background: #202622;
+  background: var(--music-accent);
 }
 
 .volume-control {
+  grid-area: volume;
   min-width: 0;
   display: flex;
   align-items: center;
@@ -655,7 +648,7 @@ const setVolume = (event) => {
 
 .music-page button:focus-visible,
 .music-page input:focus-visible {
-  outline: 2px solid #148653;
+  outline: 2px solid var(--music-accent);
   outline-offset: 2px;
 }
 
@@ -671,14 +664,6 @@ const setVolume = (event) => {
   }
 }
 
-@media (prefers-reduced-transparency: reduce) {
-  .player-dock {
-    background: #fcfdfc;
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
-  }
-}
-
 @media (max-width: 960px) {
   .music-content {
     flex-direction: column;
@@ -690,23 +675,14 @@ const setVolume = (event) => {
 
   .playlist-columns,
   .track-row {
-    grid-template-columns: minmax(260px, 1.3fr) minmax(140px, 0.6fr) 64px;
+    grid-template-columns: minmax(0, 1.3fr) minmax(100px, 0.6fr) 64px;
     column-gap: 28px;
-  }
-
-  .player-dock {
-    grid-template-columns: minmax(190px, 0.9fr) minmax(320px, 1.6fr) 130px;
-    gap: 20px;
   }
 }
 
 @media (max-width: 760px) {
-  .music-page {
-    padding-bottom: 76px;
-  }
-
   .playlist {
-    padding: 0;
+    padding: 12px 10px;
   }
 
   .playlist-columns,
@@ -736,8 +712,10 @@ const setVolume = (event) => {
 
   .player-dock {
     min-height: 76px;
-    padding: 8px 14px;
+    padding: 12px 4px;
     grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-rows: auto;
+    grid-template-areas: 'track controls';
     gap: 12px;
   }
 
@@ -749,6 +727,7 @@ const setVolume = (event) => {
   .dock-center {
     display: flex;
     align-items: center;
+    grid-area: controls;
   }
 
   .dock-controls {

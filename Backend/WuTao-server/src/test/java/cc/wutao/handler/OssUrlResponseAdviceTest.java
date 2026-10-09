@@ -59,6 +59,37 @@ class OssUrlResponseAdviceTest {
     }
 
     @Test
+    void cvApiStillSignsOssUrls() {
+        Result<String> body = Result.success(RAW_URL);
+
+        JsonNode result = (JsonNode) advice.beforeBodyWrite(
+                body,
+                null,
+                MediaType.APPLICATION_JSON,
+                MappingJackson2HttpMessageConverter.class,
+                request("/cv/personalInfo"),
+                mock(ServerHttpResponse.class));
+
+        assertEquals(SIGNED_URL, result.at("/data").asText());
+    }
+
+    @Test
+    void retiredHomeApiDoesNotSignOssUrls() {
+        Result<String> body = Result.success(RAW_URL);
+
+        Object result = advice.beforeBodyWrite(
+                body,
+                null,
+                MediaType.APPLICATION_JSON,
+                MappingJackson2HttpMessageConverter.class,
+                request("/home/personalInfo"),
+                mock(ServerHttpResponse.class));
+
+        assertSame(body, result);
+        verifyNoInteractions(aliOssUtil);
+    }
+
+    @Test
     void adminApiKeepsCanonicalOssUrls() {
         Result<String> body = Result.success(RAW_URL);
 

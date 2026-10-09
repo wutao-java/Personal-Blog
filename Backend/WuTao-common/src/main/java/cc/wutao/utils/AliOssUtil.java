@@ -79,7 +79,7 @@ public class AliOssUtil {
 
         String urlPrefix = "https://" + bucketName + "." + endpoint + "/";
         Pattern urlPattern = Pattern.compile(
-                Pattern.quote(urlPrefix) + "([a-z0-9_-]+/[a-z0-9._-]+)",
+                Pattern.quote(urlPrefix) + "([a-z0-9_-]+(?:/[a-z0-9._-]+)+)",
                 Pattern.CASE_INSENSITIVE);
         Matcher matcher = urlPattern.matcher(content);
         if (!matcher.find()) {
@@ -105,6 +105,18 @@ public class AliOssUtil {
         } finally {
             if (ossClient != null) {
                 ossClient.shutdown();
+            }
+        }
+    }
+
+    public void deleteObject(String objectKey) {
+        OSS client = null;
+        try {
+            client = new OSSClientBuilder().build(endpoint, accessKeyId, accessKeySecret);
+            client.deleteObject(bucketName, objectKey);
+        } finally {
+            if (client != null) {
+                client.shutdown();
             }
         }
     }

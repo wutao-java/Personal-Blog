@@ -36,6 +36,9 @@ public class Articles implements Serializable {
     // 封面图片url
     private String coverImage;
 
+    // 管理端预览地址（非数据库字段，不作为封面地址保存）
+    private String coverPreviewUrl;
+
     // Markdown内容
     private String contentMarkdown;
 

@@ -1,11 +1,10 @@
 # 前端静态文件目录
 #
 # 在此目录下创建以下子目录，并将构建后的前端文件放入：
-# - wutao.cc/html     (主站)
 # - blog.wutao.cc/html (博客)
 # - cv.wutao.cc/html  (简历)
 # - admin.wutao.cc/html (管理后台)
 #
 # 示例:
-# mkdir -p docker/html/wutao.cc/html
-# cp -r Frontend-Home/dist/* docker/html/wutao.cc/html/
+# mkdir -p docker/html/blog.wutao.cc/html
+# cp -r Frontend-Blog/dist/* docker/html/blog.wutao.cc/html/

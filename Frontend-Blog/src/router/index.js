@@ -62,9 +62,14 @@ const router = createRouter({
           path: 'about',
           name: 'about',
           component: () => import('@/view/About/index.vue'),
-          meta: { title: '关于' }
+          meta: { title: '主页' }
         }
       ]
+    },
+    {
+      path: '/home',
+      name: 'personalHome',
+      redirect: '/about'
     },
     {
       path: '/403',

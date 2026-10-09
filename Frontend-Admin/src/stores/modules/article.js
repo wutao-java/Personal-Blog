@@ -61,8 +61,10 @@ export const useArticleStore = defineStore('article', () => {
   const saveArticle = async (data) => {
     if (data.id) {
       await updateArticle(data)
+      return data.id
     } else {
-      await createArticle(data)
+      const res = await createArticle(data)
+      return res.data
     }
   }
 

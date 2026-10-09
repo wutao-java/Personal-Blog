@@ -53,6 +53,10 @@ public class ArticleService {
 
     private final SummaryBackfillAsyncService summaryBackfillAsyncService;
 
+    private final AiCoverService aiCoverService;
+
+    private final AiCoverCleanupService aiCoverCleanupService;
+
     private static final String VIEW_COUNT_KEY = "article:viewCount";
 
     /**
@@ -66,7 +70,7 @@ public class ArticleService {
             @CacheEvict(value = "articleArchive", allEntries = true),
             @CacheEvict(value = "blogReport", allEntries = true)
     })
-    public void createArticle(ArticleDTO articleDTO) {
+    public Long createArticle(ArticleDTO articleDTO) {
         Articles articles = new Articles();
         BeanUtils.copyProperties(articleDTO, articles);
 
@@ -104,6 +108,7 @@ public class ArticleService {
         }
 
         articleMapper.insert(articles);
+        aiCoverService.bindCover(articles.getId(), articles.getCoverImage(), articleDTO.getAiCoverId());
 
         // 保存文章-标签关联
         if (articleDTO.getTagIds() != null && !articleDTO.getTagIds().isEmpty()) {
@@ -114,6 +119,7 @@ public class ArticleService {
         if (firstPublishNow) {
             runAfterCommit(() -> handleFirstPublish(articles, articleDTO));
         }
+        return articles.getId();
     }
 
     /**
@@ -151,6 +157,7 @@ public class ArticleService {
         // 填充标签ID列表，用于管理端编辑时回显
         List<Long> tagIds = articleTagMapper.getTagIdsByArticleId(id);
         articles.setTagIds(tagIds);
+        articles.setCoverPreviewUrl(aiCoverService.previewUrl(articles.getCoverImage()));
         return articles;
     }
 
@@ -166,7 +173,7 @@ public class ArticleService {
             @CacheEvict(value = "blogReport", allEntries = true)
     })
     public void updateArticle(ArticleDTO articleDTO) {
-        Articles articles = articleMapper.getById(articleDTO.getId());
+        Articles articles = articleMapper.getByIdForUpdate(articleDTO.getId());
         if (articles == null) {
             throw new ArticleException(MessageConstant.ARTICLE_NOT_FOUND);
         }
@@ -201,6 +208,8 @@ public class ArticleService {
         }
 
         articleMapper.update(articles);
+        aiCoverService.bindCover(articles.getId(), articleDTO.getCoverImage(), articleDTO.getAiCoverId());
+        runAfterCommit(aiCoverCleanupService::cleanupAsync);
 
         // 更新文章-标签关联
         if (articleDTO.getTagIds() != null) {
@@ -228,8 +237,17 @@ public class ArticleService {
             @CacheEvict(value = "blogReport", allEntries = true)
     })
     public void batchDelete(List<Long> ids) {
+        if (ids == null || ids.isEmpty()) {
+            return;
+        }
+        for (Long id : ids.stream().distinct().sorted().toList()) {
+            if (articleMapper.getByIdForUpdate(id) != null) {
+                aiCoverService.markArticleDeleted(id);
+            }
+        }
         articleTagMapper.batchDeleteRelationsByArticleIds(ids);
         articleMapper.batchDelete(ids);
+        runAfterCommit(aiCoverCleanupService::cleanupAsync);
     }
 
     /**

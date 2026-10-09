@@ -14,6 +14,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "test": "node --test src/router/index.test.js src/view/Layout/sidebar.test.js src/view/Home/category.test.js src/view/Music/index.test.js src/assets/styles/theme.test.js src/stores/modules/demoMusic.test.js",
     "preview": "vite preview",
     "lint": "eslint . --fix --cache",
     "format": "prettier --write src/",

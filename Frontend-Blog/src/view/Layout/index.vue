@@ -1,36 +1,37 @@
 <script setup>
-import { ref, provide, watch, onMounted, onUnmounted } from 'vue'
+import { ref, computed, provide, watch, onMounted, onUnmounted } from 'vue'
 import { useRoute } from 'vue-router'
 import BlogHeader from '@/components/BlogHeader.vue'
 import BlogFooter from '@/components/BlogFooter.vue'
 import HeroBanner from '@/components/HeroBanner.vue'
-import { useBlogStore, useVisitorStore } from '@/stores'
+import SidebarCard from '@/components/SidebarCard.vue'
+import { useBlogStore, useVisitorStore, useThemeStore } from '@/stores'
 
 const route = useRoute()
 const blogStore = useBlogStore()
 const visitorStore = useVisitorStore()
+const themeStore = useThemeStore()
+const showHero = computed(() =>
+  ['article', 'category', 'tag'].includes(route.name)
+)
+const showSidebar = computed(() => route.name !== 'article')
 
-/* 暗黑模式检测 */
-const initTheme = () => {
-  const mq = window.matchMedia('(prefers-color-scheme: dark)')
-  if (mq.matches) {
-    document.documentElement.classList.add('dark')
-  }
-  mq.addEventListener('change', (e) => {
-    if (e.matches) {
-      document.documentElement.classList.add('dark')
-    } else {
-      document.documentElement.classList.remove('dark')
-    }
-  })
-}
+watch(
+  () => blogStore.personalInfo.avatar,
+  (avatar) => {
+    const favicon = document.querySelector('link[rel="icon"]')
+    if (favicon) favicon.href = avatar || '/favicon.ico'
+  },
+  { immediate: true }
+)
 
 /* 文章详情页会通过 provide/inject 传递封面和标题 */
 const articleCover = ref('')
 const articleTitle = ref('')
 const articleMeta = ref('')
+const articleHasToc = ref(false)
 
-provide('setHero', { articleCover, articleTitle, articleMeta })
+provide('setHero', { articleCover, articleTitle, articleMeta, articleHasToc })
 
 /* 路由切换时重置 hero 数据，子页面的 onMounted 会重新设置 */
 watch(
@@ -39,6 +40,7 @@ watch(
     articleCover.value = ''
     articleTitle.value = ''
     articleMeta.value = ''
+    articleHasToc.value = false
   }
 )
 
@@ -52,7 +54,7 @@ const scrollToTop = () => {
 }
 
 onMounted(() => {
-  initTheme()
+  themeStore.applyTheme()
   blogStore.init()
   visitorStore.record()
   window.addEventListener('scroll', onScroll, { passive: true })
@@ -63,20 +65,25 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="blog-layout" :class="{ 'music-layout': route.name === 'music' }">
+  <div class="blog-layout">
     <BlogHeader />
     <HeroBanner
+      v-if="showHero"
       :cover-image="articleCover"
       :title="articleTitle"
       :meta="articleMeta"
+      :has-toc="articleHasToc"
     />
-    <main class="blog-main">
-      <div class="main-inner">
-        <router-view v-slot="{ Component, route: viewRoute }">
-          <transition name="page-fade" mode="out-in">
-            <component :is="Component" :key="viewRoute.path" />
-          </transition>
-        </router-view>
+    <main class="blog-main" :class="{ 'content-only': !showHero }">
+      <div class="main-inner" :class="{ 'home-inner': route.name === 'home' }">
+        <div class="page-content">
+          <router-view v-slot="{ Component, route: viewRoute }">
+            <transition name="page-fade" mode="out-in">
+              <component :is="Component" :key="viewRoute.path" />
+            </transition>
+          </router-view>
+        </div>
+        <SidebarCard v-show="showSidebar" />
       </div>
     </main>
     <BlogFooter v-if="route.name !== 'music'" />
@@ -112,41 +119,38 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
 }
-.blog-layout.music-layout {
-  --blog-bg: #f5f7fa;
-  --blog-card: #ffffff;
-  --blog-text: #303133;
-  --blog-text2: #606266;
-  --blog-text3: #909399;
-  --blog-border: #e4e7ed;
-  --blog-border-light: #ebeef5;
-  --blog-hover: #f5f7fa;
-  color-scheme: light;
-}
 .blog-main {
   flex: 1;
   width: 100%;
   background: var(--blog-bg);
 }
+.blog-main.content-only {
+  padding-top: 124px;
+}
 .main-inner {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 32px 28px;
+  padding: 0 28px 40px;
+  display: flex;
+  align-items: flex-start;
+  gap: 24px;
+}
+.main-inner.home-inner {
+  gap: 28px;
+}
+.page-content {
+  flex: 1;
+  min-width: 0;
+  width: 100%;
 }
 /* 页面切换过渡动画 */
 .page-fade-enter-active,
 .page-fade-leave-active {
-  transition:
-    opacity 0.3s ease,
-    transform 0.3s ease;
+  transition: opacity 0.2s ease;
 }
-.page-fade-enter-from {
-  opacity: 0;
-  transform: translateY(12px);
-}
+.page-fade-enter-from,
 .page-fade-leave-to {
   opacity: 0;
-  transform: translateY(-8px);
 }
 
 /* 回到顶部 */
@@ -188,15 +192,25 @@ onUnmounted(() => {
   transform: translateY(10px);
 }
 
+@media (max-width: 960px) {
+  .main-inner {
+    flex-direction: column;
+  }
+}
 @media (max-width: 768px) {
   .main-inner {
-    padding: 20px 16px;
+    padding: 0 18px 28px;
   }
   .back-to-top {
     right: 16px;
     bottom: 20px;
     width: 38px;
     height: 38px;
+  }
+}
+@media (max-width: 600px) {
+  .blog-main.content-only {
+    padding-top: 100px;
   }
 }
 </style>

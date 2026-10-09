@@ -24,3 +24,19 @@ export const correctTypo = async (content) => {
   const res = await http.post('/admin/ai/correct', { content })
   return res?.data?.correctedContent
 }
+
+export const getAiCoverStatus = async () => {
+  const res = await http.get('/admin/article-cover/status')
+  return res.data
+}
+
+export const generateAiCover = async (title, contentMarkdown) => {
+  const res = await http.post('/admin/article-cover', {
+    title,
+    contentMarkdown
+  })
+  return res.data
+}
+
+export const discardAiCover = (id) =>
+  http.delete(`/admin/article-cover/${encodeURIComponent(id)}`)
