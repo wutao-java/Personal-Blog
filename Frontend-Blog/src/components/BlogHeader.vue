@@ -336,6 +336,10 @@ const openSearch = () => {
   flex-shrink: 0;
 }
 .nav-desktop {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   display: flex;
   flex-shrink: 0;
   gap: 12px;
