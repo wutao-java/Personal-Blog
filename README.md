@@ -452,32 +452,10 @@ docker compose logs -f
 
 如需在 Docker 部署中启用 AI 摘要模块，在 `.env` 文件中设置 `AI_ENABLED=true` 并填写 `AI_API_KEY` 等参数后重新构建镜像即可（默认不打包 AI 模块）。
 
----
-
-## 效果预览
-
-
-| 博客首页 | 文章详情 |
-|:---:|:---:|
-| ![博客首页](screenshots/blog-home.png) | ![文章详情](screenshots/blog-article.png) |
-
-| 管理后台 | 暗黑模式 |
-|:---:|:---:|
-| ![管理后台](screenshots/admin-dashboard.png) | ![暗黑模式](screenshots/blog-dark.png) |
-
-
----
 
 ## 贡献
 
 欢迎提交 Issue 和 Pull Request！详见 [CONTRIBUTING.md](CONTRIBUTING.md)。
-
-## 交流与联系
-
-有问题、建议或想一起交流的，欢迎联系：
-
-- QQ：822824739
-- 交流群：1104658479
 
 ## 开源协议
 
